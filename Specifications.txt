@@ -1,0 +1,266 @@
+# Web App Specification: 'Amicus'
+
+## 1. Overview
+- Brief description of the app : A personalized and uncensored chatbot that talks and interacts as the user wants (Personality, Language, etc.).
+- Target audience : Lonely People
+- Core functionality :
+    - The user creates a profile of himself (age, gender, interests, etc.) that will serve as context for the chatbot.
+    - The user chooses the personality and the name of the chatbot.
+
+
+## 2. Features
+- List of key features ;
+    - User Profile
+    - Chatbot Personality and Name
+    - Text-based conversations
+    - Voice conversations (TTS and STT)
+    - Image input (that the chatbot will talk about and comment on)
+- Priority level for each feature (High/Medium/Low)
+    - User Profile : High
+    - Chatbot Personality and Name : High
+    - Text-based conversations : High
+    - Voice conversations (TTS and STT) : Medium
+    - Image input (that the chatbot will talk about and comment on) : Low
+
+## 3. Technical Requirements
+- Frontend framework/library : React
+- Backend technology : Django
+- Database : PostgreSQL
+- APIs or external services : 
+-- API LLM : Replicate
+-- API for TTS : Deepgram, 
+-- API for STT : Deepgram, 
+-- API for Image Recognition : Replicate
+
+## 4. User Interface
+- Design guidelines
+- Wireframes or mockups (reference to files)
+
+## 5. Data Models
+- Key entities and their relationships:
+    1. User
+        - Fields: id, username, email, password, profile_image, created_at, last_login
+        - Relationships: 
+            - One-to-One with UserProfile
+            - One-to-Many with Conversation
+            - One-to-Many with ChatbotPersonality
+
+    2. UserProfile
+        - Fields: id, user_id (foreign key), age, gender, interests, preferences
+        - Relationships:
+            - One-to-One with User
+
+    3. ChatbotPersonality
+        - Fields: id, user_id (foreign key), name, personality_traits, language, created_at
+        - Relationships:
+            - Many-to-One with User
+            - One-to-Many with Conversation
+
+    4. Conversation
+        - Fields: id, user_id (foreign key), chatbot_personality_id (foreign key), start_time, end_time
+        - Relationships:
+            - Many-to-One with User
+            - Many-to-One with ChatbotPersonality
+            - One-to-Many with Message
+
+    5. Message
+        - Fields: id, conversation_id (foreign key), sender (user or chatbot), content, timestamp, message_type (text, voice, image)
+        - Relationships:
+            - Many-to-One with Conversation
+
+    6. VoiceMessage
+        - Fields: id, message_id (foreign key), audio_file_path
+        - Relationships:
+            - One-to-One with Message
+
+    7. ImageMessage
+        - Fields: id, message_id (foreign key), image_file_path, image_description
+        - Relationships:
+            - One-to-One with Message
+
+## 6. Security Requirements
+- Authentication method:
+    - Utilize Django's built-in authentication system
+    - Implement user registration, login, and logout functionality
+    - Use Django's User model for user management
+
+- Authorization levels:
+    - Implement Django's permission system
+    - Define user groups (e.g., regular users, premium users, administrators)
+    - Use Django's decorators (e.g., @login_required, @permission_required) for view-level access control
+
+- Data protection measures:
+    - Implement HTTPS for secure data transmission
+    - Use Django's built-in CSRF protection
+    - Store passwords using Django's password hashing system
+    - Implement Django's session management for secure user sessions
+    - Use Django's ORM to prevent SQL injection attacks
+
+## 7. Performance Requirements
+- Load time expectations : normal latency for LLM-based conversations, TTS and STT add a small delay
+- Concurrent user capacity : Small Github Project, self hosted or hosted on platform.sh
+
+## 8. Integrations
+- Third-party services or tools to be integrated:
+-- API Perplexity (LLM), 
+-- API for TTS : Deepgram, 
+-- API for STT : Deepgram, 
+-- API for Image Recognition : Clarifai
+
+## 9. Deployment
+- Hosting environment : Platform.sh / Docker (self hosted)
+- Deployment strategy : Continuous Integration and Continuous Deployment (CI/CD)
+
+## 10. Testing Requirements
+- Types of testing (e.g., unit, integration, user acceptance)
+- Test environments
+
+## 11. Timeline and Milestones
+# Define project phases and key deliverables with micro-level tasks
+
+Phase 1: Project Setup and Basic Functionality (2 weeks)
+# Detailed tasks for Week 1
+
+Day 1:
+1. Set up development environment
+   - Install Python (if not already installed)
+   - Install pip (Python package manager)
+   - Install virtualenv for project isolation
+
+2. Initialize Django project
+   - Create a new virtual environment for the project
+   - Activate the virtual environment
+   - Install Django using pip
+   - Start a new Django project using django-admin startproject command
+   - Create a new Django app using python manage.py startapp command
+
+3. Configure project settings
+   - Update INSTALLED_APPS in settings.py to include the new app
+   - Configure TIME_ZONE and LANGUAGE_CODE settings
+
+Day 2:
+4. Set up PostgreSQL database
+   - Install PostgreSQL (if not already installed)
+   - Create a new database for the project
+   - Update database settings in settings.py to use PostgreSQL
+
+5. Set up version control
+   - Initialize a Git repository
+   - Create .gitignore file to exclude unnecessary files
+   - Make initial commit with project structure
+
+6. Configure static files and templates
+   - Create directories for static files and templates
+   - Update settings.py to include static and template directories
+
+Day 3:
+7. Implement User model
+   - Create a custom User model extending AbstractUser
+   - Create and run migrations for the User model
+
+8. Set up user registration
+   - Create a registration form using Django forms
+   - Implement a view for user registration
+   - Create a template for the registration page
+   - Add URL pattern for the registration view
+
+9. Implement email verification (optional)
+   - Set up email backend in settings.py
+   - Create a view and template for email verification
+   - Implement logic to send verification emails
+
+Day 4:
+10. Implement login functionality
+    - Create a login form
+    - Implement a view for user login
+    - Create a template for the login page
+    - Add URL pattern for the login view
+
+11. Implement logout functionality
+    - Create a view for user logout
+    - Add URL pattern for the logout view
+
+12. Create base template
+    - Design a base HTML template with common elements (header, footer, navigation)
+    - Include Bootstrap or other CSS framework for basic styling
+
+Day 5:
+13. Create UserProfile model
+    - Define UserProfile model with fields like age, gender, interests
+    - Create a one-to-one relationship with User model
+    - Create and run migrations for UserProfile model
+
+14. Implement UserProfile views
+    - Create a view to display user profile
+    - Create a view to edit user profile
+    - Create templates for displaying and editing user profile
+    - Add URL patterns for profile views
+
+15. Update navigation
+    - Add links for login, logout, registration, and profile in the base template
+    - Implement conditional rendering based on user authentication status
+
+16. Basic testing and debugging
+    - Write basic unit tests for User and UserProfile models
+    - Test user registration, login, and logout functionality
+    - Debug any issues found during testing
+
+Week 2:
+- Day 1-2: Create basic Conversation and Message models
+- Day 3-4: Implement basic conversation views and templates
+- Day 5: Code review and bug fixes
+
+Phase 2: Core Features Development (3 weeks)
+Week 3:
+- Day 1-2: Set up Replicate API integration
+- Day 3-5: Implement LLM-based conversation responses
+
+Week 4:
+- Day 1-3: Integrate Deepgram API for text-to-speech functionality
+- Day 4-5: Implement speech-to-text functionality
+
+Week 5:
+- Day 1-3: Integrate Clarifai API for image recognition
+- Day 4-5: Implement image upload and processing in conversations
+
+Phase 3: UI/UX and Testing (2 weeks)
+Week 6:
+- Day 1-3: Design and implement user interface for main conversation view
+- Day 4-5: Design and implement user profile and settings pages
+
+Week 7:
+- Day 1-2: Implement responsive design for mobile devices
+- Day 3-5: Conduct thorough testing and bug fixes
+  - Unit testing for models and views
+  - Integration testing for API integrations
+  - User acceptance testing
+
+Phase 4: Deployment and Documentation (1 week)
+Week 8:
+- Day 1-2: Set up deployment environment (Platform.sh or self-hosted server)
+- Day 3: Deploy the application and conduct final tests
+- Day 4-5: Write documentation and README
+  - API documentation
+  - User guide
+  - Developer documentation
+
+## 13. Budget
+# Outline estimated costs for the project
+- Development Tools: Free (using open-source tools)
+- API Costs:
+  - Replicate API: Free tier for development (Free Credits of $5), consider paid plan for production
+  - Deepgram API: Free tier for initial development (Free Credits of $200), estimate usage for production
+- Hosting: 
+  - Platform.sh or self-hosted: Minimal costs for personal project
+
+## 14. Future Enhancements
+# List potential features for future development
+- Implement multi-language support
+- Add voice cloning capabilities for more personalized TTS
+- Develop a mobile application version
+- Integrate more advanced NLP features (sentiment analysis, entity recognition)
+- Implement a recommendation system for conversation topics
+- Add support for video messages and real-time video chat
+- Develop an API for third-party integrations
+- Implement advanced analytics and user behavior tracking
+
