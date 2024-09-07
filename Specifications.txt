@@ -150,8 +150,8 @@ Day 2:
    - ✅ Make initial commit with project structure
 
 6. Configure static files and templates
-   - Create directories for static files and templates
-   - Update settings.py to include static and template directories
+   - ✅ Create directories for static files and templates
+   - ✅ Update settings.py to include static and template directories
 
 Day 3:
 7. Implement User model
