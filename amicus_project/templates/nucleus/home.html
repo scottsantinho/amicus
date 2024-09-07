@@ -1,12 +1,13 @@
-{% extends 'nucleus/base.html' %}
+{% extends 'base.html' %}
 
-{% block title %}Sign Up - Amicus Project{% endblock %}
+{% block title %}Home - Amicus Project{% endblock %}
 
 {% block content %}
-    <h2>Sign Up</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Sign Up</button>
-    </form>
+    <h1>Welcome to Amicus Project</h1>
+    <p>This is the home page of our project.</p>
+    {% if user.is_authenticated %}
+        <p>Hello, {{ user.username }}!</p>
+    {% else %}
+        <p>Please <a href="{% url 'login' %}">log in</a> or <a href="{% url 'signup' %}">sign up</a> to get started.</p>
+    {% endif %}
 {% endblock %}

@@ -60,7 +60,7 @@ ROOT_URLCONF = 'amicus_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'templates'],  # This should point to the root templates folder
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -141,3 +141,10 @@ AUTH_USER_MODEL = 'nucleus.CustomUser'
 # Add these lines after defining STATICFILES_DIRS
 print(f"BASE_DIR: {BASE_DIR}")
 print(f"STATICFILES_DIRS: {STATICFILES_DIRS}")
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
