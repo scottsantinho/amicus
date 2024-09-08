@@ -12,6 +12,10 @@ from django.urls import reverse
 from .models import Conversation, Message
 # Import forms from current directory
 from .forms import MessageForm
+import os
+import replicate
+from django.conf import settings
+from nucleus.models import CustomUser, Profile  # Assuming your CustomUser model is in the nucleus app
 
 # Define a view for listing conversations, requiring login
 class ConversationListView(LoginRequiredMixin, ListView):
@@ -48,33 +52,55 @@ class ConversationDetailView(LoginRequiredMixin, DetailView):
 # Define a view for creating a new message, requiring login
 @login_required
 def new_message(request, pk):
-    # Get the conversation or return 404 if not found
     conversation = get_object_or_404(Conversation, pk=pk, user=request.user)
-    # Check if the request method is POST
     if request.method == 'POST':
-        # Create a form instance with POST data
         form = MessageForm(request.POST)
-        # Check if the form is valid
         if form.is_valid():
-            # Create a new message instance but don't save to database yet
             message = form.save(commit=False)
-            # Set the conversation for the message
             message.conversation = conversation
-            # Set is_user to True as this is a user message
             message.is_user = True
-            # Save the message to the database
             message.save()
-            # Create a dummy AI response (placeholder for actual AI logic)
-            Message.objects.create(
-                conversation=conversation,
-                content="This is a dummy AI response.",
-                is_user=False
-            )
-            # Save the conversation to update the 'updated_at' field
-            conversation.save()
-            # Redirect to the conversation detail page
+
+            # Get the conversation context
+            context = get_conversation_context(conversation, request.user)
+
+            # Generate AI response
+            prompt = f"{context}\n\nUser: {message.content}\nAI:"
+
+            # Use the REPLICATE_API_TOKEN from settings
+            replicate.api_key = settings.REPLICATE_API_TOKEN
+
+            try:
+                # Stream the response from Llama 3 70B
+                ai_response = ""
+                for event in replicate.stream(
+                    "meta/meta-llama-3-70b-instruct",
+                    input={
+                        "prompt": prompt,
+                        "max_new_tokens": 500,
+                        "temperature": 0.7,
+                    },
+                ):
+                    ai_response += str(event)
+
+                # Create AI message
+                Message.objects.create(
+                    conversation=conversation,
+                    content=ai_response.strip(),
+                    is_user=False
+                )
+
+                conversation.save()
+            except Exception as e:
+                print(f"Error: {str(e)}")
+                # Create an error message
+                Message.objects.create(
+                    conversation=conversation,
+                    content=f"Sorry, I couldn't generate a response at this time. Error: {type(e).__name__}",
+                    is_user=False
+                )
+
             return redirect('conversation_detail', pk=pk)
-    # If not POST request, redirect to conversation detail page
     return redirect('conversation_detail', pk=pk)
 
 # Define a view for creating a new conversation, requiring login
@@ -84,3 +110,22 @@ def new_conversation(request):
     conversation = Conversation.objects.create(user=request.user)
     # Redirect to the detail page of the newly created conversation
     return redirect('conversation_detail', pk=conversation.pk)
+
+def get_conversation_context(conversation, user):
+    # Get the last 5 messages from the conversation
+    messages = conversation.messages.order_by('-timestamp')[:5][::-1]
+    
+    # Format the messages
+    formatted_messages = [
+        f"{'User' if msg.is_user else 'AI'}: {msg.content}"
+        for msg in messages
+    ]
+    
+    # Get user profile information
+    profile = user.profile
+    user_profile = f"User Profile: Age: {profile.age or 'Not specified'}, Gender: {profile.get_gender_display() or 'Not specified'}, Description: {profile.description or 'Not provided'}"
+    
+    # Combine everything into a single context string
+    context = f"{user_profile}\n\nConversation History:\n" + "\n".join(formatted_messages)
+    
+    return context

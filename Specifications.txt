@@ -206,9 +206,9 @@ Day 5:
     - ✅ Debug any issues found during testing
 
 Week 2:
-- Day 1-2: Create basic Conversation and Message models
-- Day 3-4: Implement basic conversation views and templates
-- Day 5: Code review and bug fixes
+- Day 1-2: ✅ Create basic Conversation and Message models
+- Day 3-4: ✅ Implement basic conversation views and templates
+- Day 5: ✅ Code review and bug fixes
 
 Phase 2: Core Features Development (3 weeks)
 Week 3:
