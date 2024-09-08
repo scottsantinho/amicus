@@ -1,0 +1,21 @@
+{% extends 'nucleus/base.html' %}
+
+{% block title %}Conversation {{ conversation.pk }}{% endblock %}
+
+{% block content %}
+    <h1>Conversation {{ conversation.pk }}</h1>
+    <a href="{% url 'conversation_list' %}">Back to Conversations</a>
+    <div id="messages">
+        {% for message in conversation.messages.all %}
+            <div class="message {% if message.is_user %}user-message{% else %}ai-message{% endif %}">
+                <p>{{ message.content }}</p>
+                <small>{{ message.timestamp|date:"F d, Y H:i" }}</small>
+            </div>
+        {% endfor %}
+    </div>
+    <form method="post" action="{% url 'new_message' conversation.pk %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Send</button>
+    </form>
+{% endblock %}

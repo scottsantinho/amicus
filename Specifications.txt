@@ -159,51 +159,51 @@ Day 3:
    - Create and run migrations for the User model
 
 8. Set up user registration
-   - Create a registration form using Django forms
-   - Implement a view for user registration
-   - Create a template for the registration page
-   - Add URL pattern for the registration view
+   - ✅ Create a registration form using Django forms
+   - ✅ Implement a view for user registration
+   - ✅ Create a template for the registration page
+   - ✅ Add URL pattern for the registration view
 
 9. Implement email verification (optional)
-   - Set up email backend in settings.py
-   - Create a view and template for email verification
-   - Implement logic to send verification emails
+   - ❌ Set up email backend in settings.py
+   - ❌ Create a view and template for email verification
+   - ❌ Implement logic to send verification emails
 
 Day 4:
 10. Implement login functionality
-    - Create a login form
-    - Implement a view for user login
-    - Create a template for the login page
-    - Add URL pattern for the login view
+    - ✅ Create a login form
+    - ✅ Implement a view for user login
+    - ✅ Create a template for the login page
+    - ✅ Add URL pattern for the login view
 
 11. Implement logout functionality
-    - Create a view for user logout
-    - Add URL pattern for the logout view
+    - ✅ Create a view for user logout
+    - ✅ Add URL pattern for the logout view
 
 12. Create base template
-    - Design a base HTML template with common elements (header, footer, navigation)
-    - Include Bootstrap or other CSS framework for basic styling
+    - ✅ Design a base HTML template with common elements (header, footer, navigation)
+    - ✅ Include Bootstrap or other CSS framework for basic styling
 
 Day 5:
 13. Create UserProfile model
-    - Define UserProfile model with fields like age, gender, interests
-    - Create a one-to-one relationship with User model
-    - Create and run migrations for UserProfile model
+    - ✅ Define UserProfile model with fields like age, gender, interests
+    - ✅ Create a one-to-one relationship with User model
+    - ✅ Create and run migrations for UserProfile model
 
 14. Implement UserProfile views
-    - Create a view to display user profile
-    - Create a view to edit user profile
-    - Create templates for displaying and editing user profile
-    - Add URL patterns for profile views
+    - ✅ Create a view to display user profile
+    - ✅ Create a view to edit user profile
+    - ✅ Create templates for displaying and editing user profile
+    - ✅ Add URL patterns for profile views
 
 15. Update navigation
-    - Add links for login, logout, registration, and profile in the base template
-    - Implement conditional rendering based on user authentication status
+    - ✅ Add links for login, logout, registration, and profile in the base template
+    - ✅ Implement conditional rendering based on user authentication status
 
 16. Basic testing and debugging
-    - Write basic unit tests for User and UserProfile models
-    - Test user registration, login, and logout functionality
-    - Debug any issues found during testing
+    - ❌ Write basic unit tests for User and UserProfile models
+    - ✅ Test user registration, login, and logout functionality
+    - ✅ Debug any issues found during testing
 
 Week 2:
 - Day 1-2: Create basic Conversation and Message models
