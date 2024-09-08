@@ -7,14 +7,9 @@
     
     <form method="post">
         {% csrf_token %}
-        {{ profile_form.non_field_errors }}
-        {% for field in profile_form %}
-            <div>
-                {{ field.label_tag }}
-                {{ field }}
-                {{ field.errors }}
-            </div>
-        {% endfor %}
+        {{ profile_form.as_p }}
+        <h3>AI Profile</h3>
+        {{ ai_profile_form.as_p }}
         <button type="submit" name="update_profile">Update Profile</button>
     </form>
 
@@ -22,14 +17,7 @@
     
     <form method="post">
         {% csrf_token %}
-        {{ password_form.non_field_errors }}
-        {% for field in password_form %}
-            <div>
-                {{ field.label_tag }}
-                {{ field }}
-                {{ field.errors }}
-            </div>
-        {% endfor %}
+        {{ password_form.as_p }}
         <button type="submit" name="change_password">Change Password</button>
     </form>
 

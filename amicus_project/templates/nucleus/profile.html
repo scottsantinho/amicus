@@ -9,5 +9,13 @@
     <p>Gender: {{ user.profile.get_gender_display }}</p>
     <p>Age: {{ user.profile.age }}</p>
     <p>Description: {{ user.profile.description }}</p>
+    
+    <h3>AI Profile</h3>
+    <p>Name: {{ ai_profile.name }}</p>
+    <p>Age: {{ ai_profile.age }}</p>
+    <p>Physical Appearance: {{ ai_profile.physical_appearance }}</p>
+    <p>Personality: {{ ai_profile.personality }}</p>
+    <p>Hobbies: {{ ai_profile.hobbies }}</p>
+    
     <a href="{% url 'update_profile' %}">Update Profile</a>
 {% endblock %}

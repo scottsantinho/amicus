@@ -3,7 +3,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import CustomUserCreationForm, ProfileUpdateForm, CustomPasswordChangeForm
+from .forms import CustomUserCreationForm, ProfileUpdateForm, CustomPasswordChangeForm, AIProfileForm
+from .models import AIProfile
 
 # Define the signup view function
 def signup(request):
@@ -52,10 +53,14 @@ def update_profile(request):
         if 'update_profile' in request.POST:
             # Create a form instance with the submitted profile data
             profile_form = ProfileUpdateForm(request.POST, instance=request.user.profile)
+            ai_profile_form = AIProfileForm(request.POST, instance=getattr(request.user, 'aiprofile', None))
             # Validate the form
-            if profile_form.is_valid():
+            if profile_form.is_valid() and ai_profile_form.is_valid():
                 # Save the updated profile
                 profile = profile_form.save()
+                ai_profile = ai_profile_form.save(commit=False)
+                ai_profile.user = request.user
+                ai_profile.save()
                 # Display a success message
                 messages.success(request, 'Your profile was successfully updated.')
                 # Redirect to the profile page
@@ -79,11 +84,13 @@ def update_profile(request):
     else:
         # If it's a GET request, create empty forms
         profile_form = ProfileUpdateForm(instance=request.user.profile)
+        ai_profile_form = AIProfileForm(instance=getattr(request.user, 'aiprofile', None))
         password_form = CustomPasswordChangeForm(request.user)
     
     # Prepare the context for the template
     context = {
         'profile_form': profile_form,
+        'ai_profile_form': ai_profile_form,
         'password_form': password_form
     }
     # Render the update profile template with the context
@@ -92,11 +99,8 @@ def update_profile(request):
 # Define the profile view function, requiring login
 @login_required
 def profile(request):
-    """
-    Display the user's profile.
-    """
-    # Render the profile template with the user's profile data
-    return render(request, 'nucleus/profile.html', {'profile': request.user.profile})
+    ai_profile, created = AIProfile.objects.get_or_create(user=request.user)
+    return render(request, 'nucleus/profile.html', {'ai_profile': ai_profile})
 
 # Define the home view function
 def home(request):

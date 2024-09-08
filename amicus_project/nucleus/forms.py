@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.core.exceptions import ValidationError
-from .models import CustomUser, Profile
+from .models import CustomUser, Profile, AIProfile
 
 # Define a custom user creation form that extends Django's UserCreationForm
 class CustomUserCreationForm(UserCreationForm):
@@ -74,3 +74,9 @@ class CustomPasswordChangeForm(PasswordChangeForm):
     # Define the Meta class to specify the model
     class Meta:
         model = CustomUser
+
+# Define a form for the AI profile
+class AIProfileForm(forms.ModelForm):
+    class Meta:
+        model = AIProfile
+        fields = ['name', 'age', 'physical_appearance', 'personality', 'hobbies']
