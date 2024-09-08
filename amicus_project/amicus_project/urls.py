@@ -20,4 +20,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('nucleus.urls')),  # Include the nucleus app URLs
+    path('conversations/', include('colloquium.urls')),
 ]

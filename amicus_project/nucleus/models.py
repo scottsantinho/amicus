@@ -1,9 +1,11 @@
+# Import necessary modules from Django
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+# Define a custom user model that extends Django's AbstractUser
 class CustomUser(AbstractUser):
     """
     Custom user model extending Django's AbstractUser.
@@ -12,39 +14,43 @@ class CustomUser(AbstractUser):
     # For example:
     # is_premium = models.BooleanField(default=False)
 
+    # Define string representation of the CustomUser model
     def __str__(self):
         return self.username
 
+# Define a Profile model to store additional user information
 class Profile(models.Model):
     """
     User profile model with additional information.
     """
-    # Define gender choices
+    # Define gender choices as a list of tuples
     GENDER_CHOICES = [
         ('M', 'Man'),
         ('W', 'Woman'),
         ('O', 'Other'),
     ]
 
-    # Link to the CustomUser model
+    # Create a one-to-one relationship with the CustomUser model
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
-    # Gender field with predefined choices
+    # Define a gender field with predefined choices
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
 
-    # Age field with validators
+    # Define an age field with validators for minimum and maximum values
     age = models.PositiveIntegerField(
         validators=[MinValueValidator(18), MaxValueValidator(120)],
         null=True,
         blank=True
     )
 
-    # Description field
+    # Define a description field for additional user information
     description = models.TextField(max_length=500, blank=True)
 
+    # Define string representation of the Profile model
     def __str__(self):
         return f"{self.user.username}'s profile"
 
+# Define a signal receiver function to create or update user profile
 @receiver(post_save, sender=CustomUser)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
     """
