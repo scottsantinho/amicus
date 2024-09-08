@@ -1,21 +1,35 @@
 {% extends 'nucleus/base.html' %}
 
-{% block title %}Conversations{% endblock %}
-
 {% block content %}
-    <h1>Your Conversations</h1>
-    <a href="{% url 'new_conversation' %}">Start New Conversation</a>
+<h2>Your Conversations</h2>
+
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<form method="post" action="{% url 'delete_conversations' %}">
+    {% csrf_token %}
+    {% for conversation in conversations %}
+    <div>
+        <input type="checkbox" name="conversation_ids" value="{{ conversation.id }}" id="conv_{{ conversation.id }}">
+        <label for="conv_{{ conversation.id }}">
+            <a href="{% url 'conversation_detail' conversation.id %}">
+                {{ conversation.created_at|date:"F d, Y" }} - {{ conversation.messages.first.content|truncatechars:50 }}
+            </a>
+        </label>
+    </div>
+    {% empty %}
+    <p>No conversations yet.</p>
+    {% endfor %}
+    
     {% if conversations %}
-        <ul>
-        {% for conversation in conversations %}
-            <li>
-                <a href="{% url 'conversation_detail' conversation.pk %}">
-                    Conversation {{ conversation.pk }} - Last updated: {{ conversation.updated_at|date:"F d, Y H:i" }}
-                </a>
-            </li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>You don't have any conversations yet.</p>
+    <button type="submit">Delete Selected</button>
     {% endif %}
+</form>
+
+<a href="{% url 'new_conversation' %}">Start New Conversation</a>
 {% endblock %}

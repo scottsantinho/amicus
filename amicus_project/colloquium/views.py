@@ -16,6 +16,8 @@ import os
 import replicate
 from django.conf import settings
 from nucleus.models import CustomUser, Profile  # Assuming your CustomUser model is in the nucleus app
+from django.views.decorators.http import require_POST
+from django.contrib import messages
 
 # Define a view for listing conversations, requiring login
 class ConversationListView(LoginRequiredMixin, ListView):
@@ -29,7 +31,7 @@ class ConversationListView(LoginRequiredMixin, ListView):
     # Override the get_queryset method to filter conversations
     def get_queryset(self):
         # Return conversations for the current user, ordered by most recent update
-        return Conversation.objects.filter(user=self.request.user).order_by('-updated_at')
+        return Conversation.objects.filter(user=self.request.user, is_active=True).order_by('-updated_at')
 
 # Define a view for displaying a single conversation, requiring login
 class ConversationDetailView(LoginRequiredMixin, DetailView):
@@ -61,8 +63,8 @@ def new_message(request, pk):
             message.is_user = True
             message.save()
 
-            # Get the conversation context
-            context = get_conversation_context(conversation, request.user)
+            # Get the conversation context with a rolling window of 8000 tokens
+            context = get_conversation_context(conversation, request.user, max_tokens=8000)
 
             # Generate AI response
             prompt = f"{context}\n\nUser: {message.content}\nAI:"
@@ -111,21 +113,37 @@ def new_conversation(request):
     # Redirect to the detail page of the newly created conversation
     return redirect('conversation_detail', pk=conversation.pk)
 
-def get_conversation_context(conversation, user):
-    # Get the last 5 messages from the conversation
-    messages = conversation.messages.order_by('-timestamp')[:5][::-1]
-    
-    # Format the messages
-    formatted_messages = [
-        f"{'User' if msg.is_user else 'AI'}: {msg.content}"
-        for msg in messages
-    ]
-    
+def get_conversation_context(conversation, user, max_tokens=8000):
     # Get user profile information
     profile = user.profile
     user_profile = f"User Profile: Age: {profile.age or 'Not specified'}, Gender: {profile.get_gender_display() or 'Not specified'}, Description: {profile.description or 'Not provided'}"
     
+    # Get all messages from the conversation, ordered from newest to oldest
+    messages = conversation.messages.order_by('-timestamp')
+    
+    context_messages = []
+    estimated_token_count = len(user_profile.split())  # Rough estimate of tokens in user profile
+    
+    # Iterate through messages, adding them to the context until we reach the estimated token limit
+    for msg in messages:
+        message_text = f"{'User' if msg.is_user else 'AI'}: {msg.content}"
+        estimated_message_tokens = len(message_text.split())
+        
+        if estimated_token_count + estimated_message_tokens > max_tokens:
+            break
+        
+        context_messages.insert(0, message_text)  # Insert at the beginning to maintain chronological order
+        estimated_token_count += estimated_message_tokens
+    
     # Combine everything into a single context string
-    context = f"{user_profile}\n\nConversation History:\n" + "\n".join(formatted_messages)
+    context = f"{user_profile}\n\nConversation History:\n" + "\n".join(context_messages)
     
     return context
+
+@login_required
+@require_POST
+def delete_conversations(request):
+    conversation_ids = request.POST.getlist('conversation_ids')
+    Conversation.objects.filter(id__in=conversation_ids, user=request.user).update(is_active=False)
+    messages.success(request, f"{len(conversation_ids)} conversation(s) deleted successfully.")
+    return redirect('conversation_list')
