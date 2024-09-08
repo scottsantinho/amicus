@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
+from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import CustomUserCreationForm, ProfileUpdateForm
+from .forms import CustomUserCreationForm, ProfileUpdateForm, CustomPasswordChangeForm
 
 def signup(request):
     """
@@ -36,22 +36,35 @@ def update_profile(request):
     """
     Handle profile updates for logged-in users.
     """
-    # Check if the request method is POST (form submission)
+    # Initialize password_form to None
+    password_form = None
+
     if request.method == 'POST':
-        # Create a form instance with the submitted data and the user's current profile
-        form = ProfileUpdateForm(request.POST, instance=request.user.profile)
-        # Validate the form
-        if form.is_valid():
-            # Save the updated profile
-            form.save()
-            # Redirect to the profile page (or any other desired page)
-            return redirect('profile')
+        # Check if the user is updating profile or changing password
+        if 'update_profile' in request.POST:
+            profile_form = ProfileUpdateForm(request.POST, instance=request.user.profile)
+            if profile_form.is_valid():
+                profile = profile_form.save()
+                messages.success(request, 'Your profile was successfully updated.')
+                return redirect('profile')
+        elif 'change_password' in request.POST:
+            password_form = CustomPasswordChangeForm(request.user, request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, 'Your password was successfully updated.')
+                return redirect('profile')
+        else:
+            messages.error(request, 'Invalid form submission.')
     else:
-        # If it's a GET request, create a form pre-filled with the user's current profile data
-        form = ProfileUpdateForm(instance=request.user.profile)
+        profile_form = ProfileUpdateForm(instance=request.user.profile)
+        password_form = CustomPasswordChangeForm(request.user)
     
-    # Render the update_profile template with the form
-    return render(request, 'nucleus/update_profile.html', {'form': form})
+    context = {
+        'profile_form': profile_form,
+        'password_form': password_form
+    }
+    return render(request, 'nucleus/update_profile.html', context)
 
 @login_required
 def profile(request):
