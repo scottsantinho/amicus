@@ -1,0 +1,10 @@
+{% for message in messages %}
+    <div class="flex {% if message.is_user %}justify-end{% endif %}">
+        <div class="max-w-3/4 p-3 rounded-lg {% if message.is_user %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-800{% endif %}">
+            <p class="text-sm">{{ message.content }}</p>
+            <p class="text-xs text-gray-500 mt-1 {% if message.is_user %}text-blue-200{% endif %}">
+                {{ message.timestamp|date:"F d, Y H:i" }}
+            </p>
+        </div>
+    </div>
+{% endfor %}

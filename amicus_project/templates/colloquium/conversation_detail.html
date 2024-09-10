@@ -1,21 +1,47 @@
 {% extends 'nucleus/base.html' %}
 
-{% block title %}Conversation {{ conversation.pk }}{% endblock %}
+{% block title %}Conversations{% endblock %}
 
 {% block content %}
-    <h1>Conversation {{ conversation.pk }}</h1>
-    <a href="{% url 'conversation_list' %}">Back to Conversations</a>
-    <div id="messages">
-        {% for message in conversation.messages.all %}
-            <div class="message {% if message.is_user %}user-message{% else %}ai-message{% endif %}">
-                <p>{{ message.content }}</p>
-                <small>{{ message.timestamp|date:"F d, Y H:i" }}</small>
-            </div>
-        {% endfor %}
+<div class="p-4 border-b bg-white">
+    <h1 class="text-xl font-semibold text-gray-800">Conversation {{ conversation.pk }}</h1>
+</div>
+
+<div id="messages" class="flex-grow overflow-y-auto p-4 space-y-4">
+    {% include 'colloquium/message_list.html' with messages=conversation.messages.all %}
+</div>
+
+<form id="message-form" hx-post="{% url 'new_message' conversation.pk %}" 
+      hx-target="#messages" 
+      hx-swap="beforeend"
+      class="p-4 border-t bg-white">
+    {% csrf_token %}
+    <div class="flex items-center">
+        {{ form.content }}
+        <button type="submit" class="ml-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+            Send
+        </button>
     </div>
-    <form method="post" action="{% url 'new_message' conversation.pk %}">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Send</button>
-    </form>
+</form>
+
+<script>
+    // Scroll to bottom of messages
+    function scrollToBottom() {
+        var messagesDiv = document.getElementById('messages');
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+    scrollToBottom();
+
+    // Set up a MutationObserver to watch for changes in the messages div
+    var observer = new MutationObserver(scrollToBottom);
+    observer.observe(document.getElementById('messages'), { childList: true });
+
+    // Handle Enter key press
+    document.getElementById('message-form').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            this.submit();
+        }
+    });
+</script>
 {% endblock %}

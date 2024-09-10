@@ -1,35 +1,39 @@
 {% extends 'nucleus/base.html' %}
 
+{% block title %}Conversations - Amicus Project{% endblock %}
+
 {% block content %}
-<h2>Your Conversations</h2>
-
-{% if messages %}
-<ul class="messages">
-    {% for message in messages %}
-    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-
-<form method="post" action="{% url 'delete_conversations' %}">
-    {% csrf_token %}
-    {% for conversation in conversations %}
-    <div>
-        <input type="checkbox" name="conversation_ids" value="{{ conversation.id }}" id="conv_{{ conversation.id }}">
-        <label for="conv_{{ conversation.id }}">
-            <a href="{% url 'conversation_detail' conversation.id %}">
-                {{ conversation.created_at|date:"F d, Y" }} - {{ conversation.messages.first.content|truncatechars:50 }}
-            </a>
-        </label>
+<div class="flex h-screen bg-gray-100">
+    <!-- Conversation List -->
+    <div class="w-1/3 bg-white overflow-y-auto border-r">
+        <div class="p-4 border-b">
+            <h2 class="text-lg font-semibold mb-4">Your Conversations</h2>
+            <ul>
+                {% for conv in conversations %}
+                    <li class="mb-2">
+                        <a href="{% url 'conversation_detail' conv.pk %}" class="text-blue-500 hover:underline">
+                            Conversation {{ conv.pk }}
+                        </a>
+                    </li>
+                {% empty %}
+                    <li>No conversations yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="p-4">
+            <a href="{% url 'new_conversation' %}" class="block w-full text-center bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Start New Conversation</a>
+        </div>
     </div>
-    {% empty %}
-    <p>No conversations yet.</p>
-    {% endfor %}
-    
-    {% if conversations %}
-    <button type="submit">Delete Selected</button>
-    {% endif %}
-</form>
 
-<a href="{% url 'new_conversation' %}">Start New Conversation</a>
+    <!-- Chat Window -->
+    <div id="chat-window" class="w-2/3 flex flex-col bg-gray-50">
+        {% if active_conversation %}
+            {% include "colloquium/conversation_detail.html" with conversation=active_conversation form=form %}
+        {% else %}
+            <div class="flex-grow flex items-center justify-center">
+                <p class="text-gray-500">Select a conversation or start a new one.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

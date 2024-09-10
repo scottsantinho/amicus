@@ -3,29 +3,35 @@
 {% block title %}Update Profile - Amicus Project{% endblock %}
 
 {% block content %}
-    <h2>Update Your Profile</h2>
+<div class="max-w-2xl mx-auto">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Update Your Profile</h2>
     
-    <form method="post">
+    <form method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
         {% csrf_token %}
-        {{ profile_form.as_p }}
-        <h3>AI Profile</h3>
-        {{ ai_profile_form.as_p }}
-        <button type="submit" name="update_profile">Update Profile</button>
+        <div class="mb-6">
+            {{ profile_form.as_p }}
+        </div>
+        <h3 class="text-xl font-bold text-gray-800 mb-4">AI Profile</h3>
+        <div class="mb-6">
+            {{ ai_profile_form.as_p }}
+        </div>
+        <button type="submit" name="update_profile" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Update Profile</button>
     </form>
 
-    <h2>Change Password</h2>
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">Change Password</h2>
     
-    <form method="post">
+    <form method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
         {% csrf_token %}
         {{ password_form.as_p }}
-        <button type="submit" name="change_password">Change Password</button>
+        <button type="submit" name="change_password" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Change Password</button>
     </form>
 
     {% if messages %}
-    <ul class="messages">
+    <ul class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
         {% for message in messages %}
         <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
         {% endfor %}
     </ul>
     {% endif %}
+</div>
 {% endblock %}
