@@ -1,47 +1,53 @@
-{% extends 'nucleus/base.html' %}
+{% load static %}
 
-{% block title %}Conversations{% endblock %}
-
-{% block content %}
-<div class="p-4 border-b bg-white">
-    <h1 class="text-xl font-semibold text-gray-800">Conversation {{ conversation.pk }}</h1>
-</div>
-
-<div id="messages" class="flex-grow overflow-y-auto p-4 space-y-4">
-    {% include 'colloquium/message_list.html' with messages=conversation.messages.all %}
-</div>
-
-<form id="message-form" hx-post="{% url 'new_message' conversation.pk %}" 
-      hx-target="#messages" 
-      hx-swap="beforeend"
-      class="p-4 border-t bg-white">
-    {% csrf_token %}
-    <div class="flex items-center">
-        {{ form.content }}
-        <button type="submit" class="ml-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-            Send
-        </button>
+<div class="flex flex-col h-full">
+    <div class="conversation-container">
+        <div class="message-list" id="message-list">
+            {% for message in conversation.messages.all %}
+                <div class="mb-4 {% if message.is_user %}text-right{% else %}text-left{% endif %}">
+                    <span class="text-xs text-gray-500 mb-1 block">
+                        {% if message.is_user %}
+                            {{ user.username }}
+                        {% else %}
+                            Amicus
+                        {% endif %}
+                    </span>
+                    <span class="inline-block p-3 rounded-lg {% if message.is_user %}bg-blue-500 text-white ml-auto{% else %}bg-white text-gray-800 mr-auto{% endif %} shadow max-w-3/4">
+                        {{ message.content }}
+                    </span>
+                </div>
+            {% empty %}
+                <p class="text-center text-gray-500">No messages yet. Start the conversation!</p>
+            {% endfor %}
+        </div>
+        <form method="post" action="{% url 'new_message' conversation.pk %}" class="message-form">
+            {% csrf_token %}
+            <div class="input-group">
+                {{ form.content }}
+                <button type="submit" class="send-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="send-icon" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    </svg>
+                </button>
+            </div>
+        </form>
     </div>
-</form>
+</div>
 
 <script>
-    // Scroll to bottom of messages
     function scrollToBottom() {
-        var messagesDiv = document.getElementById('messages');
+        var messagesDiv = document.getElementById('message-list');
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
     scrollToBottom();
 
-    // Set up a MutationObserver to watch for changes in the messages div
     var observer = new MutationObserver(scrollToBottom);
-    observer.observe(document.getElementById('messages'), { childList: true });
+    observer.observe(document.getElementById('message-list'), { childList: true });
 
-    // Handle Enter key press
-    document.getElementById('message-form').addEventListener('keypress', function(e) {
+    document.querySelector('.message-form').addEventListener('keypress', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             this.submit();
         }
     });
 </script>
-{% endblock %}

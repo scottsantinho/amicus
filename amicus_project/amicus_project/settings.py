@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     #Personal Apps
+    'widget_tweaks',
     'nucleus', # Core functionality
     'colloquium', # Conversation handling
     'vox', # Voice assistant
@@ -149,4 +150,4 @@ AUTHENTICATION_BACKENDS = [
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
-REPLICATE_API_TOKEN = 'r8_c6r9g8dIYQikvaKmlzldfU2fE56FlqB4SbQjd'
+REPLICATE_API_TOKEN = 'r8_MwQGs74BmerRzTDHICLGlqj2Aul9S9E2Y0kVg'

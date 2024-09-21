@@ -6,6 +6,10 @@
     <title>{% block title %}Amicus Project{% endblock %}</title>
     {% load static %}
     <link href="{% static 'css/output.css' %}" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@1.6.1"></script>
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/@material-tailwind/html@latest/styles/material-tailwind.css" rel="stylesheet">
 </head>
 <body class="h-full">
     <div class="min-h-full">
@@ -43,5 +47,6 @@
             </div>
         </main>
     </div>
+    <script src="https://unpkg.com/@material-tailwind/html@latest/scripts/ripple.js"></script>
 </body>
 </html>

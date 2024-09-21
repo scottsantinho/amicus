@@ -30,7 +30,7 @@ from django.http import HttpResponse
 # Define a view for listing conversations, requiring login
 class ConversationListView(LoginRequiredMixin, ListView):
     model = Conversation
-    template_name = 'colloquium/conversations.html'
+    template_name = 'colloquium/conversation_list.html'  # Change this line
     context_object_name = 'conversations'
 
     def get_queryset(self):
@@ -47,6 +47,10 @@ class ConversationListView(LoginRequiredMixin, ListView):
             active_conversation = get_object_or_404(Conversation, id=conversation_id, user=self.request.user)
         elif conversations.exists():
             active_conversation = conversations.first()
+
+        if active_conversation:
+            # Refresh the conversation to get the latest messages
+            active_conversation.refresh_from_db()
 
         context.update({
             'conversation': active_conversation,
@@ -77,14 +81,15 @@ def new_message(request, pk):
             message.conversation = conversation
             message.is_user = True
             message.save()
+            print(f"User message saved: {message.content}")  # Debug print
 
             context = get_conversation_context(conversation, request.user, max_tokens=8000)
             prompt = f"{context}\n\nUser: {message.content}\nAI:"
 
-            os.environ["REPLICATE_API_TOKEN"] = settings.REPLICATE_API_TOKEN
-            replicate.api_key = settings.REPLICATE_API_TOKEN
-
             try:
+                os.environ["REPLICATE_API_TOKEN"] = settings.REPLICATE_API_TOKEN
+                replicate.api_key = settings.REPLICATE_API_TOKEN
+
                 ai_response = ""
                 for event in replicate.stream(
                     "meta/meta-llama-3-70b-instruct",
@@ -95,19 +100,28 @@ def new_message(request, pk):
                     },
                 ):
                     ai_response += str(event)
+                print(f"AI response generated: {ai_response}")  # Debug print
 
                 ai_message = Message.objects.create(
                     conversation=conversation,
                     content=ai_response.strip(),
                     is_user=False
                 )
+                print(f"AI message saved: {ai_message.content}")  # Debug print
 
                 conversation.save()
-            except Exception as e:
-                print(f"Error: {str(e)}")
+            except replicate.exceptions.ReplicateError as e:
+                print(f"Replicate API error: {str(e)}")
                 ai_message = Message.objects.create(
                     conversation=conversation,
-                    content=f"Sorry, I couldn't generate a response at this time. Error: {type(e).__name__}",
+                    content=f"I apologize, but I'm having trouble connecting to my knowledge base right now. Please try again later.",
+                    is_user=False
+                )
+            except Exception as e:
+                print(f"Error generating AI response: {str(e)}")
+                ai_message = Message.objects.create(
+                    conversation=conversation,
+                    content=f"I'm sorry, but I encountered an unexpected error. Please try again later.",
                     is_user=False
                 )
 
@@ -121,8 +135,10 @@ def new_message(request, pk):
 # Define a view for creating a new conversation, requiring login
 @login_required
 def new_conversation(request):
+    # Create a new conversation and associate it with the current user
     conversation = Conversation.objects.create(user=request.user)
-    return redirect('conversation_list')
+    # Redirect to the conversation detail page
+    return redirect('conversation_detail', pk=conversation.pk)
 
 # Function to get conversation context
 def get_conversation_context(conversation, user, max_tokens=8000):
@@ -186,4 +202,13 @@ def delete_conversations(request):
     # Add success message
     messages.success(request, f"{len(conversation_ids)} conversation(s) deleted successfully.")
     # Redirect to conversation list page
+    return redirect('conversation_list')
+
+# Define a view for deleting a single conversation, requiring login
+@login_required
+def delete_conversation(request, pk):
+    conversation = get_object_or_404(Conversation, pk=pk, user=request.user)
+    conversation.is_active = False
+    conversation.save()
+    messages.success(request, f"Conversation {pk} has been deleted.")
     return redirect('conversation_list')
