@@ -31,7 +31,7 @@ class CustomUserCreationForm(UserCreationForm):
         return user
 
 # Define a form for updating user profiles
-class ProfileUpdateForm(forms.ModelForm):
+class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['user_name', 'user_age', 'user_gender', 'user_description']

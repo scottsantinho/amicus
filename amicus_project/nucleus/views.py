@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import CustomUserCreationForm, ProfileUpdateForm, CustomPasswordChangeForm, AIProfileForm
+from .forms import CustomUserCreationForm, ProfileForm, CustomPasswordChangeForm, AIProfileForm
 from .models import AIProfile, Profile  # Change UserProfile to Profile
 
 # Define the signup view function
@@ -60,7 +60,7 @@ def profile(request):
     ai_profile, created = AIProfile.objects.get_or_create(user=request.user)
     
     if request.method == 'POST':
-        profile_form = ProfileUpdateForm(request.POST, instance=user_profile)
+        profile_form = ProfileForm(request.POST, instance=user_profile)
         ai_profile_form = AIProfileForm(request.POST, instance=ai_profile)
         if profile_form.is_valid() and ai_profile_form.is_valid():
             profile_form.save()
@@ -68,12 +68,12 @@ def profile(request):
             messages.success(request, 'Your profile has been updated successfully.')
             return redirect('profile')
     else:
-        profile_form = ProfileUpdateForm(instance=user_profile)
+        profile_form = ProfileForm(instance=user_profile)
         ai_profile_form = AIProfileForm(instance=ai_profile)
     
     return render(request, 'nucleus/profile.html', {
-        'profile_form': profile_form,
-        'ai_profile_form': ai_profile_form
+        'form': profile_form,
+        'ai_form': ai_profile_form
     })
 
 # Define the home view function
@@ -83,3 +83,27 @@ def home(request):
     """
     # Render the home template
     return render(request, 'nucleus/home.html')
+
+# Define the profile_view function, requiring login
+@login_required
+def profile_view(request):
+    user = request.user
+    profile, created = Profile.objects.get_or_create(user=user)
+    ai_profile, created = AIProfile.objects.get_or_create(user=user)
+
+    if request.method == 'POST':
+        profile_form = ProfileForm(request.POST, instance=profile)
+        ai_profile_form = AIProfileForm(request.POST, instance=ai_profile)
+        if profile_form.is_valid() and ai_profile_form.is_valid():
+            profile_form.save()
+            ai_profile_form.save()
+            return redirect('profile')
+    else:
+        profile_form = ProfileForm(instance=profile)
+        ai_profile_form = AIProfileForm(instance=ai_profile)
+
+    context = {
+        'form': profile_form,
+        'ai_form': ai_profile_form,
+    }
+    return render(request, 'nucleus/profile.html', context)
