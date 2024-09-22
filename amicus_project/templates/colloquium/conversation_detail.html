@@ -1,8 +1,20 @@
 <div class="flex flex-col h-full bg-gray-100">
     <!-- Message List -->
     <div id="message-list" class="flex-grow overflow-y-auto p-4 space-y-4">
-        {% for message in conversation.messages.all %}
-            {% include 'colloquium/message.html' with message=message %}
+        {% for message in messages %}
+            <div class="flex {% if message.is_user %}justify-end{% else %}justify-start{% endif %} mb-4">
+                <div class="max-w-xs lg:max-w-md">
+                    <div class="text-sm font-semibold mb-1 {% if message.is_user %}text-right text-blue-600{% else %}text-left text-gray-600{% endif %}">
+                        {{ message.is_user|yesno:"User,AI" }}
+                    </div>
+                    <div class="p-3 rounded-lg {% if message.is_user %}bg-blue-500 text-white{% else %}bg-gray-200{% endif %}">
+                        <div class="text-sm">{{ message.content }}</div>
+                        <div class="text-xs mt-1 {% if message.is_user %}text-blue-200{% else %}text-gray-500{% endif %}">
+                            {{ message.timestamp|date:"F d, Y H:i" }}
+                        </div>
+                    </div>
+                </div>
+            </div>
         {% endfor %}
     </div>
     
@@ -29,53 +41,39 @@
         function createMessageElement(name, content, isUser, timestamp) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`;
-            
-            const containerDiv = document.createElement('div');
-            containerDiv.className = 'max-w-xs lg:max-w-md';
-            
-            const nameDiv = document.createElement('div');
-            nameDiv.className = `text-sm font-semibold mb-1 ${isUser ? 'text-right text-blue-600' : 'text-left text-gray-600'}`;
-            nameDiv.textContent = name;
-            
-            const innerDiv = document.createElement('div');
-            innerDiv.className = `p-3 rounded-lg ${isUser ? 'bg-blue-500 text-white' : 'bg-gray-200'}`;
-            
-            const textDiv = document.createElement('div');
-            textDiv.className = 'text-sm';
-            textDiv.textContent = content;
-            
-            const timeDiv = document.createElement('div');
-            timeDiv.className = `text-xs mt-1 ${isUser ? 'text-blue-200' : 'text-gray-500'}`;
-            timeDiv.textContent = timestamp;
-            
-            innerDiv.appendChild(textDiv);
-            innerDiv.appendChild(timeDiv);
-            containerDiv.appendChild(nameDiv);
-            containerDiv.appendChild(innerDiv);
-            messageDiv.appendChild(containerDiv);
+            messageDiv.innerHTML = `
+                <div class="max-w-xs lg:max-w-md">
+                    <div class="text-sm font-semibold mb-1 ${isUser ? 'text-right text-blue-600' : 'text-left text-gray-600'}">
+                        ${name}
+                    </div>
+                    <div class="p-3 rounded-lg ${isUser ? 'bg-blue-500 text-white' : 'bg-gray-200'}">
+                        <div class="text-sm">${content}</div>
+                        <div class="text-xs mt-1 ${isUser ? 'text-blue-200' : 'text-gray-500'}">
+                            ${timestamp}
+                        </div>
+                    </div>
+                </div>
+            `;
             return messageDiv;
         }
 
-        // Function to append a message to the message list
         function appendMessage(message, isUser) {
             const messageDiv = createMessageElement(message.name, message.content, isUser, message.timestamp);
             messageList.appendChild(messageDiv);
             scrollToBottom();
         }
 
-        // Function to scroll to the bottom of the message list
         function scrollToBottom() {
             messageList.scrollTop = messageList.scrollHeight;
         }
 
-        // Handle form submission for sending messages
         messageForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(messageForm);
             const content = formData.get('content');
 
             if (content.trim()) {
-                const conversationId = "{{ conversation.pk }}";  // Ensure this is available
+                const conversationId = "{{ conversation.pk }}";
 
                 try {
                     const response = await fetch(`/conversations/${conversationId}/new_message/`, {
@@ -89,11 +87,8 @@
 
                     if (response.ok) {
                         const data = await response.json();
-                        // Append user message
                         appendMessage(data.user_message, true);
-                        // Append AI message
                         appendMessage(data.ai_message, false);
-                        // Reset the form
                         messageForm.reset();
                     } else {
                         console.error('Failed to send message:', response.status, response.statusText);
@@ -104,9 +99,7 @@
             }
         });
 
-        // Scroll to the bottom when the page loads
-        window.addEventListener('load', () => {
-            scrollToBottom();
-        });
+        // Scroll to bottom when the page loads
+        window.addEventListener('load', scrollToBottom);
     </script>
 </div>

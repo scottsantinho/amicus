@@ -34,7 +34,7 @@ import json
 # Define a view for listing conversations, requiring login
 class ConversationListView(LoginRequiredMixin, ListView):
     model = Conversation
-    template_name = 'colloquium/conversation_list.html'  # Change this line
+    template_name = 'colloquium/conversation_list.html'
     context_object_name = 'conversations'
 
     def get_queryset(self):
@@ -72,10 +72,8 @@ class ConversationDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ai_profile'] = self.object.user.aiprofile
+        context['messages'] = self.object.messages.all().order_by('timestamp')
         return context
-
-    def render_to_response(self, context, **response_kwargs):
-        return render(self.request, self.template_name, context)
 
 # Define a view for creating a new message, requiring login
 @login_required
