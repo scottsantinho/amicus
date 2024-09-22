@@ -1,5 +1,5 @@
 # Import the path function from django.urls module
-from django.urls import path
+from django.urls import path, include
 # Import the auth_views from django.contrib.auth module
 from django.contrib.auth import views as auth_views
 # Import the LogoutView from django.contrib.auth.views module
@@ -19,4 +19,6 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     # URL pattern for the signup page
     path('signup/', views.signup, name='signup'),  # Add this line
+    # Add this line to include colloquium URLs
+    path('conversations/', include('colloquium.urls')),
 ]
