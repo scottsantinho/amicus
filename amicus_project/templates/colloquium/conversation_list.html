@@ -12,7 +12,7 @@
             {% for conv in conversations %}
                 <li class="mb-2 flex justify-between items-center">
                     <a href="#" class="load-conversation block p-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-300 flex-grow mr-2" data-conversation-id="{{ conv.pk }}">
-                        Conversation n°{{ forloop.revcounter }}
+                        {{ conv.display_name }}
                     </a>
                     <span class="conversation-actions">
                         <button class="edit-conversation text-blue-500 hover:text-blue-700 mr-2" data-conversation-id="{{ conv.pk }}">
@@ -216,7 +216,9 @@ function loadConversation(conversationId) {
         document.getElementById('conversation-content').innerHTML = html;
         const conversationElement = document.querySelector(`.load-conversation[data-conversation-id="${conversationId}"]`);
         const conversationTitle = conversationElement ? conversationElement.textContent.trim() : `Conversation ${conversationId}`;
-        document.getElementById('conversation-title').textContent = conversationTitle;
+        const titleElement = document.getElementById('conversation-title');
+        titleElement.textContent = conversationTitle;
+        titleElement.dataset.conversationId = conversationId;
         
         document.querySelectorAll('.load-conversation').forEach(el => {
             el.classList.remove('bg-blue-200');
@@ -243,23 +245,31 @@ function loadConversation(conversationId) {
 function editConversation(conversationId) {
     const newName = prompt("Enter a new name for this conversation:");
     if (newName !== null && newName.trim() !== "") {
-        fetch(`/conversation/${conversationId}/edit/`, {
+        fetch(`/conversations/${conversationId}/edit/`, {
             method: 'POST',
             headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
             },
             body: JSON.stringify({ name: newName })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                // Update the conversation name in the sidebar
                 const conversationElement = document.querySelector(`.load-conversation[data-conversation-id="${conversationId}"]`);
                 if (conversationElement) {
                     conversationElement.textContent = newName;
                 }
+                // Update the conversation title if it's the active conversation
+                const conversationTitle = document.getElementById('conversation-title');
+                if (conversationTitle && conversationTitle.dataset.conversationId === conversationId) {
+                    conversationTitle.textContent = newName;
+                }
+                // Refresh the conversation list
+                location.reload();
             } else {
-                console.error('Failed to update conversation name');
+                console.error('Failed to update conversation name:', data.error);
             }
         })
         .catch(error => console.error('Error:', error));

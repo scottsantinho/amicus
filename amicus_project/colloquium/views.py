@@ -61,6 +61,9 @@ class ConversationListView(LoginRequiredMixin, ListView):
             'form': form,
         })
 
+        for conversation in conversations:
+            conversation.display_name = conversation.name or f"Conversation {conversation.id}"
+
         return context
 
 # Define a view for displaying a single conversation, requiring login
@@ -294,22 +297,19 @@ def get_ai_response(conversation, user_message):
         print(f"Error generating AI response: {str(e)}")
         return "I'm sorry, but I encountered an unexpected error. Please try again later."
 
-from django.views.generic.edit import UpdateView
-from django.urls import reverse_lazy
-from .models import Conversation
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.views import View
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
-@method_decorator(require_POST, name='dispatch')
-class ConversationEditView(LoginRequiredMixin, UpdateView):
-    model = Conversation
-    fields = ['name']
-    template_name = 'colloquium/conversation_edit.html'
-    
-    def form_valid(self, form):
-        self.object = form.save()
-        return JsonResponse({'success': True})
-
-    def form_invalid(self, form):
-        return JsonResponse({'success': False, 'errors': form.errors})
+@method_decorator(csrf_exempt, name='dispatch')
+class ConversationEditView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        conversation = get_object_or_404(Conversation, pk=pk, user=request.user)
+        data = json.loads(request.body)
+        new_name = data.get('name')
+        if new_name:
+            conversation.name = new_name
+            conversation.save()
+            print(f"Conversation {pk} name updated to: {new_name}")  # Debug print
+            return JsonResponse({'success': True, 'new_name': new_name})
+        return JsonResponse({'success': False, 'error': 'No name provided'})
