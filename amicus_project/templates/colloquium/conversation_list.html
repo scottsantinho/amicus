@@ -4,51 +4,53 @@
 {% block title %}Your Conversations{% endblock %}
 
 {% block content %}
-<div class="flex h-screen bg-gray-100">
-    <!-- Sidebar -->
-    <div class="w-1/3 bg-white p-6 overflow-y-auto">
-        <h2 class="text-2xl font-bold mb-4 text-gray-800">Your Conversations</h2>
-        <ul id="conversation-list">
-            {% for conv in conversations %}
-                <li class="mb-2 flex justify-between items-center">
-                    <a href="#" class="load-conversation block p-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-300 flex-grow mr-2" data-conversation-id="{{ conv.pk }}">
-                        {{ conv.display_name }}
-                    </a>
-                    <span class="conversation-actions">
-                        <button class="edit-conversation text-blue-500 hover:text-blue-700 mr-2" data-conversation-id="{{ conv.pk }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                            </svg>
-                        </button>
-                        <button class="delete-conversation text-red-500 hover:text-red-700" data-conversation-id="{{ conv.pk }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                    </span>
-                </li>
-            {% empty %}
-                <li id="no-conversations">No conversations yet.</li>
-            {% endfor %}
-        </ul>
-        <button id="new-conversation-btn" class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
-            New Conversation
-        </button>
-    </div>
-
-    <!-- Chat Window -->
-    <div id="chat-window" class="w-2/3 flex flex-col bg-white shadow-lg">
-        <div class="p-4 border-b border-gray-200">
-            <h2 id="conversation-title" class="text-xl font-semibold text-gray-800">{% if conversation %}Conversation {{ conversation.pk }}{% else %}No Conversation Selected{% endif %}</h2>
+<div class="flex h-screen">
+    <div class="w-full flex bg-white shadow-lg overflow-hidden">
+        <!-- Sidebar -->
+        <div class="w-1/3 bg-gray-50 p-6 overflow-y-auto border-r border-gray-200">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Your Conversations</h2>
+            <ul id="conversation-list" class="space-y-2">
+                {% for conv in conversations %}
+                    <li class="flex justify-between items-center">
+                        <a href="#" class="load-conversation block p-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-300 flex-grow mr-2" data-conversation-id="{{ conv.pk }}">
+                            {{ conv.display_name }}
+                        </a>
+                        <span class="conversation-actions flex">
+                            <button class="edit-conversation text-blue-500 hover:text-blue-700 p-1" data-conversation-id="{{ conv.pk }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                            </button>
+                            <button class="delete-conversation text-red-500 hover:text-red-700 p-1" data-conversation-id="{{ conv.pk }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </span>
+                    </li>
+                {% empty %}
+                    <li id="no-conversations" class="text-gray-500 italic">No conversations yet.</li>
+                {% endfor %}
+            </ul>
+            <button id="new-conversation-btn" class="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                New Conversation
+            </button>
         </div>
-        <div id="conversation-content" class="flex-grow overflow-y-auto">
-            {% if conversation %}
-                {% include "colloquium/conversation_detail.html" with conversation=conversation form=form %}
-            {% else %}
-                <div class="flex-grow flex items-center justify-center bg-gray-50">
-                    <p class="text-2xl text-gray-400 font-light">Select a conversation or start a new one.</p>
-                </div>
-            {% endif %}
+
+        <!-- Chat Window -->
+        <div id="chat-window" class="w-2/3 flex flex-col bg-white">
+            <div class="p-4 border-b border-gray-200">
+                <h2 id="conversation-title" class="text-xl font-semibold text-gray-800">{% if conversation %}{{ conversation.display_name }}{% else %}No Conversation Selected{% endif %}</h2>
+            </div>
+            <div id="conversation-content" class="flex-grow overflow-y-auto">
+                {% if conversation %}
+                    {% include "colloquium/conversation_detail.html" with conversation=conversation form=form %}
+                {% else %}
+                    <div class="flex-grow flex items-center justify-center bg-gray-50">
+                        <p class="text-2xl text-gray-400 font-light">Select a conversation or start a new one.</p>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
@@ -109,18 +111,18 @@ function createNewConversation() {
             const conversationList = document.getElementById('conversation-list');
             const newConversationNumber = conversationList.children.length + 1;
             const newConversationItem = document.createElement('li');
-            newConversationItem.className = 'mb-2 flex justify-between items-center';
+            newConversationItem.className = 'flex justify-between items-center';
             newConversationItem.innerHTML = `
                 <a href="#" class="load-conversation block p-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-300 flex-grow mr-2" data-conversation-id="${data.conversation_id}">
                     Conversation n°${newConversationNumber}
                 </a>
-                <span class="conversation-actions">
-                    <button class="edit-conversation text-blue-500 hover:text-blue-700 mr-2" data-conversation-id="${data.conversation_id}">
+                <span class="conversation-actions flex">
+                    <button class="edit-conversation text-blue-500 hover:text-blue-700 p-1" data-conversation-id="${data.conversation_id}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                         </svg>
                     </button>
-                    <button class="delete-conversation text-red-500 hover:text-red-700" data-conversation-id="${data.conversation_id}">
+                    <button class="delete-conversation text-red-500 hover:text-red-700 p-1" data-conversation-id="${data.conversation_id}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                         </svg>
@@ -177,6 +179,7 @@ function deleteConversation(conversationId) {
                 // Add the "No conversations yet" message
                 const noConversationsElem = document.createElement('li');
                 noConversationsElem.id = 'no-conversations';
+                noConversationsElem.className = 'text-gray-500 italic';
                 noConversationsElem.textContent = 'No conversations yet.';
                 conversationList.appendChild(noConversationsElem);
             } else {
