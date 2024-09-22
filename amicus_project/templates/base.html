@@ -1,0 +1,6 @@
+<span id="current-user-name" style="display: none;">
+    {{ request.user.profile.user_name|default:request.user.username }}
+</span>
+<span id="ai-name" style="display: none;">
+    {{ ai_name }}  <!-- Make sure to pass this variable in your view -->
+</span>

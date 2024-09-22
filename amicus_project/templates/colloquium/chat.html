@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div id="chat-window" class="overflow-y-auto h-[calc(100vh-200px)]">
+    {% include 'colloquium/message_list.html' %}
+</div>
+
+<form id="chat-form" class="mt-4">
+    {% csrf_token %}
+    <input type="text" id="message-input" class="w-full p-2 border rounded" placeholder="Type your message...">
+    <button type="button" id="send-button" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded">Send</button>
+</form>
+
+<script src="{% static 'js/chat.js' %}"></script>
+{% endblock %}

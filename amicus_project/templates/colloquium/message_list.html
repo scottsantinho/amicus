@@ -1,10 +1,23 @@
 {% for message in messages %}
-    <div class="flex {% if message.is_user %}justify-end{% endif %}">
-        <div class="max-w-3/4 p-3 rounded-lg {% if message.is_user %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-800{% endif %}">
-            <p class="text-sm">{{ message.content }}</p>
-            <p class="text-xs text-gray-500 mt-1 {% if message.is_user %}text-blue-200{% endif %}">
-                {{ message.timestamp|date:"F d, Y H:i" }}
-            </p>
+    <div class="flex {% if message.is_user %}justify-end{% else %}justify-start{% endif %} mb-4">
+        <div class="max-w-xs lg:max-w-md">
+            <!-- Sender's Name -->
+            <div class="text-sm font-semibold mb-1 {% if message.is_user %}text-right text-blue-600{% else %}text-left text-gray-600{% endif %}">
+                <span class="sender-name">
+                    {% if message.is_user %}
+                        {{ message.conversation.user.profile.user_name|default:message.conversation.user.username }}
+                    {% else %}
+                        {{ ai_name }}
+                    {% endif %}
+                </span>
+            </div>
+            <!-- Message Content and Timestamp -->
+            <div class="p-3 rounded-lg {% if message.is_user %}bg-blue-500 text-white{% else %}bg-gray-200{% endif %}">
+                <div class="text-sm message-content">{{ message.content }}</div>
+                <div class="text-xs mt-1 {% if message.is_user %}text-blue-200{% else %}text-gray-500{% endif %} message-timestamp">
+                    {{ message.timestamp|date:"F d, Y H:i" }}
+                </div>
+            </div>
         </div>
     </div>
 {% endfor %}

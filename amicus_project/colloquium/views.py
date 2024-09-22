@@ -20,14 +20,16 @@ import replicate
 from django.conf import settings
 # Import user-related models from nucleus app
 from nucleus.models import CustomUser, Profile, AIProfile
-# Import HTTP POST decorator
-from django.views.decorators.http import require_POST
+# Import HTTP POST decorator and require_http_methods
+from django.views.decorators.http import require_POST, require_http_methods
 # Import messages framework
 from django.contrib import messages
 # Import HttpResponse for handling HTTP responses
 from django.http import HttpResponse
 # Import JsonResponse for JSON response
 from django.http import JsonResponse
+# Import json for handling JSON data
+import json
 
 # Define a view for listing conversations, requiring login
 class ConversationListView(LoginRequiredMixin, ListView):
@@ -69,75 +71,77 @@ class ConversationDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'] = MessageForm()
+        context['ai_profile'] = self.object.user.aiprofile
         return context
 
     def render_to_response(self, context, **response_kwargs):
-        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return render(self.request, self.template_name, context)
-        return super().render_to_response(context, **response_kwargs)
+        return render(self.request, self.template_name, context)
 
 # Define a view for creating a new message, requiring login
 @login_required
+@require_http_methods(["POST"])
 def new_message(request, pk):
     conversation = get_object_or_404(Conversation, pk=pk, user=request.user)
-    if request.method == 'POST':
-        form = MessageForm(request.POST)
-        if form.is_valid():
-            message = form.save(commit=False)
-            message.conversation = conversation
-            message.is_user = True
-            message.save()
-            print(f"User message saved: {message.content}")  # Debug print
+    
+    # Try to parse JSON data
+    try:
+        data = json.loads(request.body)
+        message_content = data.get('content')
+    except json.JSONDecodeError:
+        # If JSON parsing fails, try to get data from POST
+        message_content = request.POST.get('content')
 
-            context = get_conversation_context(conversation, request.user, max_tokens=8000)
-            prompt = f"{context}\n\nUser: {message.content}\nAI:"
+    if message_content:
+        message = Message.objects.create(
+            conversation=conversation,
+            content=message_content,
+            is_user=True
+        )
+        print(f"User message saved: {message.content}")  # Debug print
 
-            try:
-                os.environ["REPLICATE_API_TOKEN"] = settings.REPLICATE_API_TOKEN
-                replicate.api_key = settings.REPLICATE_API_TOKEN
+        context = get_conversation_context(conversation, request.user, max_tokens=8000)
+        prompt = f"{context}\n\nUser: {message.content}\nAI:"
 
-                ai_response = ""
-                for event in replicate.stream(
-                    "meta/meta-llama-3-70b-instruct",
-                    input={
-                        "prompt": prompt,
-                        "max_new_tokens": 500,
-                        "temperature": 0.7,
-                    },
-                ):
-                    ai_response += str(event)
-                print(f"AI response generated: {ai_response}")  # Debug print
+        try:
+            os.environ["REPLICATE_API_TOKEN"] = settings.REPLICATE_API_TOKEN
+            replicate.api_key = settings.REPLICATE_API_TOKEN
 
-                ai_message = Message.objects.create(
-                    conversation=conversation,
-                    content=ai_response.strip(),
-                    is_user=False
-                )
-                print(f"AI message saved: {ai_message.content}")  # Debug print
+            ai_response = ""
+            for event in replicate.stream(
+                "meta/meta-llama-3-70b-instruct",
+                input={
+                    "prompt": prompt,
+                    "max_new_tokens": 500,
+                    "temperature": 0.7,
+                },
+            ):
+                ai_response += str(event)
+            print(f"AI response generated: {ai_response}")  # Debug print
 
-                conversation.save()
-            except replicate.exceptions.ReplicateError as e:
-                print(f"Replicate API error: {str(e)}")
-                ai_message = Message.objects.create(
-                    conversation=conversation,
-                    content=f"I apologize, but I'm having trouble connecting to my knowledge base right now. Please try again later.",
-                    is_user=False
-                )
-            except Exception as e:
-                print(f"Error generating AI response: {str(e)}")
-                ai_message = Message.objects.create(
-                    conversation=conversation,
-                    content=f"I'm sorry, but I encountered an unexpected error. Please try again later.",
-                    is_user=False
-                )
+            ai_message = Message.objects.create(
+                conversation=conversation,
+                content=ai_response.strip(),
+                is_user=False
+            )
+            print(f"AI message saved: {ai_message.content}")  # Debug print
 
-            if request.headers.get('HX-Request'):
-                return render(request, 'colloquium/message_list.html', {'messages': [message, ai_message]})
-            else:
-                return redirect('conversation_list')
+            conversation.save()
+            return JsonResponse({'success': True, 'ai_response': ai_message.content})
+        except replicate.exceptions.ReplicateError as e:
+            print(f"Replicate API error: {str(e)}")
+            ai_response = "I apologize, but I'm having trouble connecting to my knowledge base right now. Please try again later."
+        except Exception as e:
+            print(f"Error generating AI response: {str(e)}")
+            ai_response = "I'm sorry, but I encountered an unexpected error. Please try again later."
 
-    return redirect('conversation_list')
+        ai_message = Message.objects.create(
+            conversation=conversation,
+            content=ai_response,
+            is_user=False
+        )
+        return JsonResponse({'success': True, 'ai_response': ai_response})
+
+    return JsonResponse({'success': False, 'error': 'No message content provided'}, status=400)
 
 # Define a view for creating a new conversation, requiring login
 @login_required
@@ -153,21 +157,17 @@ def new_conversation(request):
 
 # Function to get conversation context
 def get_conversation_context(conversation, user, max_tokens=8000):
-    # Get user profile information
     profile = user.profile
-    # Create user profile string
-    user_profile = f"User Profile: Age: {profile.age or 'Not specified'}, Gender: {profile.get_gender_display() or 'Not specified'}, Description: {profile.description or 'Not provided'}"
+    user_profile = f"User Profile: Name: {profile.user_name or 'Not specified'}, Age: {profile.user_age or 'Not specified'}, Gender: {profile.get_user_gender_display() or 'Not specified'}, Description: {profile.user_description or 'Not provided'}"
     
-    # Get or create AI profile information
     ai_profile, created = AIProfile.objects.get_or_create(user=user)
-    # Create AI profile context string
     ai_profile_context = f"""
     AI Assistant Profile:
-    Name: {ai_profile.name or 'Not specified'}
-    Age: {ai_profile.age or 'Not specified'}
-    Physical Appearance: {ai_profile.physical_appearance or 'Not specified'}
-    Personality: {ai_profile.personality or 'Not specified'}
-    Hobbies: {ai_profile.hobbies or 'Not specified'}
+    Name: {ai_profile.ai_name or 'Not specified'}
+    Age: {ai_profile.ai_age or 'Not specified'}
+    Physical Appearance: {ai_profile.ai_physical_appearance or 'Not specified'}
+    Personality: {ai_profile.ai_personality or 'Not specified'}
+    Hobbies: {ai_profile.ai_hobbies or 'Not specified'}
     
     You are an AI assistant with the above profile. Please respond to the user's messages in a way that reflects your personality, age, and interests. Your responses should be consistent with your profile.
     """
@@ -223,3 +223,74 @@ def delete_conversation(request, pk):
     conversation.save()
     messages.success(request, f"Conversation {pk} has been deleted.")
     return redirect('conversation_list')
+
+# Define a view for sending a message, requiring login and POST method
+@login_required
+@require_POST
+def send_message(request, conversation_id):
+    print(f"Received request to send_message for conversation {conversation_id}")  # Debug print
+    conversation = get_object_or_404(Conversation, pk=conversation_id, user=request.user)
+    try:
+        data = json.loads(request.body)
+        content = data.get('content')
+        print(f"Received content: {content}")  # Debug print
+    except json.JSONDecodeError:
+        print("Failed to parse JSON data")  # Debug print
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'}, status=400)
+
+    if content:
+        user_profile = request.user.profile
+        user_name = user_profile.user_name or request.user.username
+        message = Message.objects.create(
+            conversation=conversation,
+            content=content,
+            is_user=True
+        )
+        print(f"User message created: {message.id}")  # Debug print
+
+        # Use the existing new_message logic to get AI response
+        ai_response = get_ai_response(conversation, content)
+        print(f"AI response generated: {ai_response[:50]}...")  # Debug print
+
+        ai_profile = conversation.user.aiprofile
+        ai_name = ai_profile.ai_name or "AI Assistant"
+        ai_message = Message.objects.create(
+            conversation=conversation,
+            content=ai_response,
+            is_user=False
+        )
+        print(f"AI message created: {ai_message.id}")  # Debug print
+
+        return JsonResponse({
+            'success': True, 
+            'user_message': {'name': user_name, 'content': content},
+            'ai_message': {'name': ai_name, 'content': ai_response}
+        })
+    
+    print("No message content provided")  # Debug print
+    return JsonResponse({'success': False, 'error': 'No message content provided'}, status=400)
+
+# Add this helper function to get AI response
+def get_ai_response(conversation, user_message):
+    context = get_conversation_context(conversation, conversation.user)
+    prompt = f"{context}\n\nUser: {user_message}\nAI:"
+
+    try:
+        os.environ["REPLICATE_API_TOKEN"] = settings.REPLICATE_API_TOKEN
+        replicate.api_key = settings.REPLICATE_API_TOKEN
+
+        ai_response = ""
+        for event in replicate.stream(
+            "meta/meta-llama-3-70b-instruct",
+            input={
+                "prompt": prompt,
+                "max_new_tokens": 500,
+                "temperature": 0.7,
+            },
+        ):
+            ai_response += str(event)
+        
+        return ai_response.strip()
+    except Exception as e:
+        print(f"Error generating AI response: {str(e)}")
+        return "I'm sorry, but I encountered an unexpected error. Please try again later."

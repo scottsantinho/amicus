@@ -32,42 +32,9 @@ class CustomUserCreationForm(UserCreationForm):
 
 # Define a form for updating user profiles
 class ProfileUpdateForm(forms.ModelForm):
-    # Add an email field to the form
-    email = forms.EmailField()
-
-    # Define the Meta class to specify the model and fields
     class Meta:
         model = Profile
-        fields = ['gender', 'age', 'description', 'email']
-
-    # Override the constructor to set the initial value of the email field
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['email'].initial = self.instance.user.email
-
-    # Override the save method to update both the profile and user email
-    def save(self, commit=True):
-        # Call the parent class's save method
-        profile = super().save(commit=False)
-        if commit:
-            # Save the profile instance
-            profile.save()
-            # Update the user's email
-            profile.user.email = self.cleaned_data['email']
-            profile.user.save()
-        return profile
-
-    def clean_age(self):
-        # Get the age value from the cleaned data
-        age = self.cleaned_data.get('age')
-        
-        # Check if age is provided (it's optional)
-        if age is not None:
-            # Validate age against the model's validators
-            if age < 18 or age > 120:
-                raise ValidationError("Age must be between 18 and 120.")
-        
-        return age
+        fields = ['user_name', 'user_age', 'user_gender', 'user_description']
 
 # Define a custom password change form
 class CustomPasswordChangeForm(PasswordChangeForm):
@@ -79,4 +46,4 @@ class CustomPasswordChangeForm(PasswordChangeForm):
 class AIProfileForm(forms.ModelForm):
     class Meta:
         model = AIProfile
-        fields = ['name', 'age', 'physical_appearance', 'personality', 'hobbies']
+        fields = ['ai_name', 'ai_age', 'ai_physical_appearance', 'ai_personality', 'ai_hobbies']

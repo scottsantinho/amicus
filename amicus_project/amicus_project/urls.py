@@ -19,6 +19,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('conversations/', include('colloquium.urls')),
+    path('conversations/', include('colloquium.urls')),  # Make sure this line is present
     path('', include('nucleus.urls')),  # Include the nucleus app URLs
 ]

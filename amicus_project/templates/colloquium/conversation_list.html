@@ -55,7 +55,7 @@ document.getElementById('new-conversation-btn').addEventListener('click', functi
         headers: {
             'X-CSRFToken': '{{ csrf_token }}',
             'Content-Type': 'application/json'
-        }
+        },
     })
     .then(response => response.json())
     .then(data => {
@@ -124,6 +124,57 @@ function loadConversation(conversationId) {
         if (activeConversation) {
             activeConversation.classList.remove('bg-gray-200');
             activeConversation.classList.add('bg-blue-200');
+        }
+
+        // Add event listener to the message form
+        const messageForm = document.querySelector('#message-form');
+        if (messageForm) {
+            messageForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const messageInput = this.querySelector('textarea[name="content"]');
+                const message = messageInput.value.trim();
+                if (message) {
+                    addMessageToConversation(message, true);
+                    messageInput.value = '';
+                    sendMessage(conversationId, message);
+                }
+            });
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function addMessageToConversation(content, isUser) {
+    const messageList = document.querySelector('#message-list');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `flex ${isUser ? 'justify-end' : ''}`;
+    messageDiv.innerHTML = `
+        <div class="max-w-3/4 p-3 rounded-lg ${isUser ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}">
+            <p class="text-sm">${content}</p>
+            <p class="text-xs text-gray-500 mt-1 ${isUser ? 'text-blue-200' : ''}">
+                ${new Date().toLocaleString()}
+            </p>
+        </div>
+    `;
+    messageList.appendChild(messageDiv);
+    messageList.scrollTop = messageList.scrollHeight;
+}
+
+function sendMessage(conversationId, message) {
+    fetch(`/conversations/${conversationId}/new_message/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            addMessageToConversation(data.ai_response, false);
+        } else {
+            console.error('Failed to send message:', data.error);
         }
     })
     .catch(error => console.error('Error:', error));
