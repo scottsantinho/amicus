@@ -38,7 +38,7 @@ class ConversationListView(LoginRequiredMixin, ListView):
     context_object_name = 'conversations'
 
     def get_queryset(self):
-        return Conversation.objects.filter(user=self.request.user, is_active=True).order_by('-updated_at')
+        return super().get_queryset().filter(user=self.request.user, is_active=True).order_by('-created_at')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -293,3 +293,23 @@ def get_ai_response(conversation, user_message):
     except Exception as e:
         print(f"Error generating AI response: {str(e)}")
         return "I'm sorry, but I encountered an unexpected error. Please try again later."
+
+from django.views.generic.edit import UpdateView
+from django.urls import reverse_lazy
+from .models import Conversation
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.utils.decorators import method_decorator
+
+@method_decorator(require_POST, name='dispatch')
+class ConversationEditView(LoginRequiredMixin, UpdateView):
+    model = Conversation
+    fields = ['name']
+    template_name = 'colloquium/conversation_edit.html'
+    
+    def form_valid(self, form):
+        self.object = form.save()
+        return JsonResponse({'success': True})
+
+    def form_invalid(self, form):
+        return JsonResponse({'success': False, 'errors': form.errors})
