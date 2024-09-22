@@ -175,6 +175,17 @@ def get_conversation_context(conversation, user, max_tokens=8000):
     You are an AI assistant with the above profile. Please respond to the user's messages in a way that reflects your personality, age, and interests. Your responses should be consistent with your profile.
     """
     
+    code_formatting_instruction = """
+    When providing code snippets in your responses, always format them using triple backticks and specify the language. For example:
+
+    ```python
+    def example_function():
+        print("This is a formatted code snippet")
+    ```
+
+    This applies to all programming languages, including HTML, CSS, JavaScript, etc. Always specify the appropriate language after the opening backticks.
+    """
+
     # Get all messages from the conversation, ordered from newest to oldest
     messages = conversation.messages.order_by('-timestamp')
     
@@ -199,8 +210,18 @@ def get_conversation_context(conversation, user, max_tokens=8000):
         # Update estimated token count
         estimated_token_count += estimated_message_tokens
     
+    # Join the context messages into a single string
+    conversation_history = "\n".join(context_messages)
+    
     # Combine everything into a single context string
-    context = f"{user_profile}\n\n{ai_profile_context}\n\nConversation History:\n" + "\n".join(context_messages)
+    context = f"""
+    {user_profile}
+    {ai_profile_context}
+    {code_formatting_instruction}
+    
+    Previous conversation:
+    {conversation_history}
+    """
     
     # Return the complete context
     return context
@@ -273,6 +294,21 @@ def send_message(request, conversation_id):
     return JsonResponse({'success': False, 'error': 'No message content provided'}, status=400)
 
 # Add this helper function to get AI response
+import re
+
+def format_code_blocks(text):
+    # Regular expression to find code blocks
+    code_block_regex = r'```(\w+)?\n(.*?)\n```'
+    
+    def replace_code_block(match):
+        language = match.group(1) or ''
+        code = match.group(2)
+        return f'```{language}\n{code}\n```'
+    
+    # Replace code blocks in the text
+    formatted_text = re.sub(code_block_regex, replace_code_block, text, flags=re.DOTALL)
+    return formatted_text
+
 def get_ai_response(conversation, user_message):
     context = get_conversation_context(conversation, conversation.user)
     prompt = f"{context}\n\nUser: {user_message}\nAI:"
@@ -292,7 +328,9 @@ def get_ai_response(conversation, user_message):
         ):
             ai_response += str(event)
         
-        return ai_response.strip()
+        # Apply code formatting to the AI response
+        formatted_response = format_code_blocks(ai_response.strip())
+        return formatted_response
     except Exception as e:
         print(f"Error generating AI response: {str(e)}")
         return "I'm sorry, but I encountered an unexpected error. Please try again later."

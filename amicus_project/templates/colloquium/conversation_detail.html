@@ -1,3 +1,5 @@
+{% load markdown_extras %}
+
 <div class="flex flex-col h-full bg-gray-100">
     <!-- Message List -->
     <div id="message-list" class="flex-grow overflow-y-auto p-4 space-y-4">
@@ -8,7 +10,7 @@
                         {% if message.is_user %}{{ user_name }}{% else %}{{ ai_name }}{% endif %}
                     </div>
                     <div class="p-3 rounded-lg {% if message.is_user %}bg-blue-500 text-white{% else %}bg-gray-200{% endif %}">
-                        <div class="text-sm">{{ message.content }}</div>
+                        <div class="message-content">{{ message.content|markdown|safe }}</div>
                         <div class="text-xs mt-1 {% if message.is_user %}text-blue-200{% else %}text-gray-500{% endif %}">
                             {{ message.timestamp|date:"F d, Y H:i" }}
                         </div>

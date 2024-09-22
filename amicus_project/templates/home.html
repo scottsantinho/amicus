@@ -1,14 +1,10 @@
-{% extends 'nucleus/base.html' %}
+{% extends 'base.html' %}
 {% load static %}
-
-{% block title %}Home - Amicus Project{% endblock %}
 
 {% block content %}
 <div class="home-container">
     {% if user.is_authenticated %}
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">Welcome to Amicus Project</h1>
-        <p class="text-xl text-gray-600 mb-8">This is the home page of our project.</p>
-        <p class="text-2xl text-green-600">Hello, {{ user.username }}!</p>
+        <!-- Existing content for authenticated users -->
     {% else %}
         <div class="logo-container">
             <img src="{% static 'assets/logo/logo_V2.png' %}" alt="Amicus Logo" class="logo">

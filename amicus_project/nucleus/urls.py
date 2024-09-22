@@ -11,14 +11,10 @@ from . import views
 urlpatterns = [
     # URL pattern for the home page
     path('', views.home, name='home'),
-    # URL pattern for the signup page
-    path('signup/', views.signup, name='signup'),
     # URL pattern for the login page, using Django's built-in LoginView
     path('login/', auth_views.LoginView.as_view(template_name='nucleus/login.html'), name='login'),
     # URL pattern for the logout functionality, using Django's built-in LogoutView
-    path('logout/', LogoutView.as_view(next_page='home', template_name='nucleus/home.html'), name='logout'),
+    path('logout/', LogoutView.as_view(next_page='home'), name='logout'),
     # URL pattern for the user profile page
     path('profile/', views.profile, name='profile'),
-    # URL pattern for updating the user profile
-    path('profile/update/', views.update_profile, name='update_profile'),
 ]
