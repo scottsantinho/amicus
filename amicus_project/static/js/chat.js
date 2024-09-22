@@ -4,6 +4,18 @@ function initializeChat() {
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
     function sendMessage(conversationId, message) {
+        // Immediately display user message
+        const userMessage = {
+            name: document.getElementById('current-user-name').textContent.trim(),
+            content: message,
+            timestamp: new Date().toLocaleString()
+        };
+        addMessageToConversation(userMessage, true);
+
+        // Display AI typing indicator
+        const aiName = document.getElementById('ai-name').textContent.trim();
+        const typingIndicator = addTypingIndicator(aiName);
+
         fetch(`/conversations/${conversationId}/send_message/`, {
             method: 'POST',
             headers: {
@@ -15,13 +27,18 @@ function initializeChat() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                addMessageToConversation(data.user_message, true);
+                // Remove typing indicator
+                typingIndicator.remove();
+                // Add AI message
                 addMessageToConversation(data.ai_message, false);
             } else {
                 console.error('Failed to send message:', data.error);
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            typingIndicator.remove();
+        });
     }
 
     function addMessageToConversation(message, isUser) {
@@ -42,6 +59,34 @@ function initializeChat() {
         `;
         messageList.appendChild(messageDiv);
         messageList.scrollTop = messageList.scrollHeight;
+    }
+
+    function addTypingIndicator(aiName) {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'flex justify-start mb-4';
+        typingDiv.innerHTML = `
+            <div class="max-w-xs lg:max-w-md">
+                <div class="text-sm font-semibold mb-1 text-left text-gray-600">
+                    ${aiName}
+                </div>
+                <div class="p-3 rounded-lg bg-gray-200">
+                    <div class="text-sm typing-indicator">${aiName} is typing<span class="dots">...</span></div>
+                </div>
+            </div>
+        `;
+        messageList.appendChild(typingDiv);
+        messageList.scrollTop = messageList.scrollHeight;
+        animateTypingIndicator(typingDiv.querySelector('.dots'));
+        return typingDiv;
+    }
+
+    function animateTypingIndicator(dotsElement) {
+        let dotCount = 0;
+        const interval = setInterval(() => {
+            dotCount = (dotCount + 1) % 4;
+            dotsElement.textContent = '.'.repeat(dotCount);
+        }, 500);
+        dotsElement.dataset.interval = interval;
     }
 
     if (messageForm) {

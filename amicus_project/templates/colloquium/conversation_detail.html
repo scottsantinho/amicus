@@ -20,7 +20,7 @@
     
     <!-- Message Form -->
     <div class="bg-white border-t p-4">
-        <form id="message-form" class="flex items-center space-x-2">
+        <form id="message-form" class="flex items-center space-x-2" data-conversation-id="{{ conversation.pk }}">
             {% csrf_token %}
             <textarea name="content" class="flex-grow p-2 border rounded-lg" placeholder="Type your message..." rows="1"></textarea>
             <button type="submit" class="bg-blue-500 text-white p-2 rounded-full">
@@ -32,76 +32,84 @@
         </form>
     </div>
     
-    <!-- JavaScript for Handling Message Submission -->
-    <script>
-        const messageList = document.getElementById('message-list');
-        const messageForm = document.getElementById('message-form');
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        const conversationId = "{{ conversation.pk }}";
+    <!-- Hidden elements for user and AI names -->
+    <span id="current-user-name" style="display: none;">
+        {{ request.user.profile.user_name|default:request.user.username }}
+    </span>
+    <span id="ai-name" style="display: none;">
+        {{ ai_name }}
+    </span>
+</div>
 
-        // Store the conversation ID in localStorage
-        localStorage.setItem('selectedConversationId', conversationId);
+<!-- JavaScript for Handling Message Submission -->
+<script>
+    const messageList = document.getElementById('message-list');
+    const messageForm = document.getElementById('message-form');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const conversationId = "{{ conversation.pk }}";
 
-        function createMessageElement(name, content, isUser, timestamp) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`;
-            messageDiv.innerHTML = `
-                <div class="max-w-xs lg:max-w-md">
-                    <div class="text-sm font-semibold mb-1 ${isUser ? 'text-right text-blue-600' : 'text-left text-gray-600'}">
-                        ${name}
-                    </div>
-                    <div class="p-3 rounded-lg ${isUser ? 'bg-blue-500 text-white' : 'bg-gray-200'}">
-                        <div class="text-sm">${content}</div>
-                        <div class="text-xs mt-1 ${isUser ? 'text-blue-200' : 'text-gray-500'}">
-                            ${timestamp}
-                        </div>
+    // Store the conversation ID in localStorage
+    localStorage.setItem('selectedConversationId', conversationId);
+
+    function createMessageElement(name, content, isUser, timestamp) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`;
+        messageDiv.innerHTML = `
+            <div class="max-w-xs lg:max-w-md">
+                <div class="text-sm font-semibold mb-1 ${isUser ? 'text-right text-blue-600' : 'text-left text-gray-600'}">
+                    ${name}
+                </div>
+                <div class="p-3 rounded-lg ${isUser ? 'bg-blue-500 text-white' : 'bg-gray-200'}">
+                    <div class="text-sm">${content}</div>
+                    <div class="text-xs mt-1 ${isUser ? 'text-blue-200' : 'text-gray-500'}">
+                        ${timestamp}
                     </div>
                 </div>
-            `;
-            return messageDiv;
-        }
+            </div>
+        `;
+        return messageDiv;
+    }
 
-        function appendMessage(message, isUser) {
-            const messageDiv = createMessageElement(message.name, message.content, isUser, message.timestamp);
-            messageList.appendChild(messageDiv);
-            scrollToBottom();
-        }
+    function appendMessage(message, isUser) {
+        const messageDiv = createMessageElement(message.name, message.content, isUser, message.timestamp);
+        messageList.appendChild(messageDiv);
+        scrollToBottom();
+    }
 
-        function scrollToBottom() {
-            messageList.scrollTop = messageList.scrollHeight;
-        }
+    function scrollToBottom() {
+        messageList.scrollTop = messageList.scrollHeight;
+    }
 
-        messageForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(messageForm);
-            const content = formData.get('content');
+    messageForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(messageForm);
+        const content = formData.get('content');
 
-            if (content.trim()) {
-                try {
-                    const response = await fetch(`/conversations/${conversationId}/new_message/`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': csrfToken,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ content: content }),
-                    });
+        if (content.trim()) {
+            try {
+                const response = await fetch(`/conversations/${conversationId}/new_message/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ content: content }),
+                });
 
-                    if (response.ok) {
-                        const data = await response.json();
-                        appendMessage(data.user_message, true);
-                        appendMessage(data.ai_message, false);
-                        messageForm.reset();
-                    } else {
-                        console.error('Failed to send message:', response.status, response.statusText);
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
+                if (response.ok) {
+                    const data = await response.json();
+                    appendMessage(data.user_message, true);
+                    appendMessage(data.ai_message, false);
+                    messageForm.reset();
+                } else {
+                    console.error('Failed to send message:', response.status, response.statusText);
                 }
+            } catch (error) {
+                console.error('Error:', error);
             }
-        });
+        }
+    });
 
-        // Scroll to bottom when the page loads
-        window.addEventListener('load', scrollToBottom);
-    </script>
-</div>
+    // Scroll to bottom when the page loads
+    window.addEventListener('load', scrollToBottom);
+</script>
