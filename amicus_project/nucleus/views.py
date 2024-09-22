@@ -17,14 +17,6 @@ def signup(request):
         form = CustomUserCreationForm(request.POST)
         # Validate the form
         if form.is_valid():
-            # Get the age from the cleaned form data
-            age = form.cleaned_data.get('age')
-            # Check if the user is under 18
-            if age and age < 18:
-                # Display an error message for underage users
-                messages.error(request, "Sorry, come back when you'll be 18!")
-                # Render the signup page with the form
-                return render(request, 'nucleus/signup.html', {'form': form})
             # Save the new user
             user = form.save()
             # Log the user in

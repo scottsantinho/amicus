@@ -17,4 +17,6 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(next_page='home'), name='logout'),
     # URL pattern for the user profile page
     path('profile/', views.profile, name='profile'),
+    # URL pattern for the signup page
+    path('signup/', views.signup, name='signup'),  # Add this line
 ]

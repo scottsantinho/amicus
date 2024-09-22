@@ -4,16 +4,21 @@
 {% block title %}Home - Amicus Project{% endblock %}
 
 {% block content %}
-<div class="home-container">
+<div class="home-container flex flex-col items-center justify-center min-h-screen">
+    <div class="logo-container w-1/4 mb-8">
+        <img src="{% static 'assets/logo/logo_V2.png' %}" alt="Amicus Logo" class="w-full h-auto">
+    </div>
+    
     {% if user.is_authenticated %}
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">Welcome to Amicus Project</h1>
-        <p class="text-xl text-gray-600 mb-8">This is the home page of our project.</p>
-        <p class="text-2xl text-green-600">Hello, {{ user.username }}!</p>
+        <h1 class="amicus-title text-6xl font-bold text-gray-900 mb-4">Amicus</h1>
+        <p class="text-xl text-gray-600 mb-8">Chat with your personalized Amicus</p>
     {% else %}
-        <div class="logo-container">
-            <img src="{% static 'assets/logo/logo_V2.png' %}" alt="Amicus Logo" class="logo">
+        <h1 class="amicus-title text-6xl font-bold text-gray-900 mb-4">Amicus</h1>
+        <p class="text-xl text-gray-600 mb-8">Welcome to Amicus Project. Please log in or sign up to continue.</p>
+        <div class="flex space-x-4">
+            <a href="{% url 'login' %}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Login</a>
+            <a href="{% url 'signup' %}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Sign Up</a>
         </div>
-        <h1 class="amicus-title">Amicus</h1>
     {% endif %}
 </div>
 {% endblock %}
@@ -30,22 +35,17 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        height: 100vh;
+        min-height: calc(100vh - 4rem); /* Adjust based on your navbar height */
     }
 
     .logo-container {
-        margin-bottom: 20px;
-    }
-
-    .logo {
-        max-width: 200px;
-        height: auto;
+        width: 25%; /* Set to 1/4 of the container */
+        max-width: 300px; /* Optional: set a max-width to prevent the logo from becoming too large on big screens */
     }
 
     .amicus-title {
         font-family: 'Cinzel', serif;
-        font-size: 48px;
-        color: #333;
+        color: #1a202c; /* Tailwind's gray-900 */
     }
 </style>
 {% endblock %}
