@@ -7,10 +7,10 @@
     <!-- Sidebar -->
     <div class="w-1/3 bg-white p-6 overflow-y-auto">
         <h2 class="text-2xl font-bold mb-4 text-gray-800">Your Conversations</h2>
-        <ul>
+        <ul id="conversation-list">
             {% for conv in conversations %}
                 <li class="mb-2 flex justify-between items-center">
-                    <a href="{% url 'conversation_detail' conv.pk %}" class="block p-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-300 flex-grow mr-2">
+                    <a href="#" class="load-conversation block p-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-300 flex-grow mr-2" data-conversation-id="{{ conv.pk }}">
                         Conversation {{ conv.pk }}
                     </a>
                     <form action="{% url 'delete_conversation' conv.pk %}" method="post" onsubmit="return confirm('Are you sure you want to delete this conversation?');">
@@ -23,26 +23,110 @@
                     </form>
                 </li>
             {% empty %}
-                <li>No conversations yet.</li>
+                <li id="no-conversations">No conversations yet.</li>
             {% endfor %}
         </ul>
-        <a href="{% url 'new_conversation' %}" class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+        <button id="new-conversation-btn" class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
             New Conversation
-        </a>
+        </button>
     </div>
 
     <!-- Chat Window -->
     <div id="chat-window" class="w-2/3 flex flex-col bg-white shadow-lg">
-        {% if conversation %}
-            <div class="p-4 border-b border-gray-200">
-                <h2 class="text-xl font-semibold text-gray-800">Conversation {{ conversation.pk }}</h2>
-            </div>
-            {% include "colloquium/conversation_detail.html" with conversation=conversation form=form %}
-        {% else %}
-            <div class="flex-grow flex items-center justify-center bg-gray-50">
-                <p class="text-2xl text-gray-400 font-light">Select a conversation or start a new one.</p>
-            </div>
-        {% endif %}
+        <div class="p-4 border-b border-gray-200">
+            <h2 id="conversation-title" class="text-xl font-semibold text-gray-800">{% if conversation %}Conversation {{ conversation.pk }}{% else %}No Conversation Selected{% endif %}</h2>
+        </div>
+        <div id="conversation-content" class="flex-grow overflow-y-auto">
+            {% if conversation %}
+                {% include "colloquium/conversation_detail.html" with conversation=conversation form=form %}
+            {% else %}
+                <div class="flex-grow flex items-center justify-center bg-gray-50">
+                    <p class="text-2xl text-gray-400 font-light">Select a conversation or start a new one.</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
 </div>
+
+<script>
+document.getElementById('new-conversation-btn').addEventListener('click', function() {
+    fetch('{% url 'new_conversation' %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove the "No conversations yet" message if it exists
+            const noConversationsElem = document.getElementById('no-conversations');
+            if (noConversationsElem) {
+                noConversationsElem.remove();
+            }
+
+            // Add the new conversation to the list
+            const conversationList = document.getElementById('conversation-list');
+            const newConversationItem = document.createElement('li');
+            newConversationItem.className = 'mb-2 flex justify-between items-center';
+            newConversationItem.innerHTML = `
+                <a href="#" class="load-conversation block p-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-300 flex-grow mr-2" data-conversation-id="${data.conversation_id}">
+                    Conversation ${data.conversation_id}
+                </a>
+                <form action="/conversations/${data.conversation_id}/delete/" method="post" onsubmit="return confirm('Are you sure you want to delete this conversation?');">
+                    {% csrf_token %}
+                    <button type="submit" class="text-red-500 hover:text-red-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </form>
+            `;
+            conversationList.insertBefore(newConversationItem, conversationList.firstChild);
+
+            // Add event listener to the new conversation item
+            newConversationItem.querySelector('.load-conversation').addEventListener('click', function(e) {
+                e.preventDefault();
+                loadConversation(data.conversation_id);
+            });
+
+            // Load the new conversation immediately
+            loadConversation(data.conversation_id);
+        } else {
+            console.error('Failed to create new conversation');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+document.querySelectorAll('.load-conversation').forEach(function(element) {
+    element.addEventListener('click', function(e) {
+        e.preventDefault();
+        var conversationId = this.getAttribute('data-conversation-id');
+        loadConversation(conversationId);
+    });
+});
+
+function loadConversation(conversationId) {
+    fetch(`/conversations/${conversationId}/`)
+    .then(response => response.text())
+    .then(html => {
+        document.getElementById('conversation-content').innerHTML = html;
+        document.getElementById('conversation-title').textContent = `Conversation ${conversationId}`;
+        
+        // Highlight the active conversation in the list
+        document.querySelectorAll('.load-conversation').forEach(el => {
+            el.classList.remove('bg-blue-200');
+            el.classList.add('bg-gray-200');
+        });
+        const activeConversation = document.querySelector(`.load-conversation[data-conversation-id="${conversationId}"]`);
+        if (activeConversation) {
+            activeConversation.classList.remove('bg-gray-200');
+            activeConversation.classList.add('bg-blue-200');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
 {% endblock %}

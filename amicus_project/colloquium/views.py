@@ -26,6 +26,8 @@ from django.views.decorators.http import require_POST
 from django.contrib import messages
 # Import HttpResponse for handling HTTP responses
 from django.http import HttpResponse
+# Import JsonResponse for JSON response
+from django.http import JsonResponse
 
 # Define a view for listing conversations, requiring login
 class ConversationListView(LoginRequiredMixin, ListView):
@@ -69,6 +71,11 @@ class ConversationDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['form'] = MessageForm()
         return context
+
+    def render_to_response(self, context, **response_kwargs):
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return render(self.request, self.template_name, context)
+        return super().render_to_response(context, **response_kwargs)
 
 # Define a view for creating a new message, requiring login
 @login_required
@@ -135,10 +142,14 @@ def new_message(request, pk):
 # Define a view for creating a new conversation, requiring login
 @login_required
 def new_conversation(request):
-    # Create a new conversation and associate it with the current user
-    conversation = Conversation.objects.create(user=request.user)
-    # Redirect to the conversation detail page
-    return redirect('conversation_detail', pk=conversation.pk)
+    if request.method == 'POST':
+        conversation = Conversation.objects.create(user=request.user)
+        return JsonResponse({
+            'success': True,
+            'conversation_id': conversation.pk,
+            'html': render(request, 'colloquium/conversation_detail.html', {'conversation': conversation, 'form': MessageForm()}).content.decode('utf-8')
+        })
+    return JsonResponse({'success': False}, status=400)
 
 # Function to get conversation context
 def get_conversation_context(conversation, user, max_tokens=8000):
