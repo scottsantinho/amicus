@@ -1,65 +1,62 @@
-async function sendMessage() {
-    const messageInput = document.querySelector('#message-input');
-    const messageContent = messageInput.value.trim();
+function initializeChat() {
+    const messageForm = document.querySelector('#message-form');
+    const messageList = document.querySelector('#message-list');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-    if (messageContent) {
-        messageInput.value = '';
-
-        try {
-            const response = await fetch('/send_message/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCsrfToken(),
-                },
-                body: JSON.stringify({ message: messageContent }),
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                addMessageToChat(data.user_message);
-                addMessageToChat(data.ai_response);
+    function sendMessage(conversationId, message) {
+        fetch(`/conversations/${conversationId}/send_message/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                addMessageToConversation(data.user_message, true);
+                addMessageToConversation(data.ai_message, false);
             } else {
-                console.error('Failed to send message');
+                console.error('Failed to send message:', data.error);
             }
-        } catch (error) {
-            console.error('Error:', error);
-        }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function addMessageToConversation(message, isUser) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`;
+        messageDiv.innerHTML = `
+            <div class="max-w-xs lg:max-w-md">
+                <div class="text-sm font-semibold mb-1 ${isUser ? 'text-right text-blue-600' : 'text-left text-gray-600'}">
+                    ${message.name}
+                </div>
+                <div class="p-3 rounded-lg ${isUser ? 'bg-blue-500 text-white' : 'bg-gray-200'}">
+                    <div class="text-sm">${message.content}</div>
+                    <div class="text-xs mt-1 ${isUser ? 'text-blue-200' : 'text-gray-500'}">
+                        ${message.timestamp}
+                    </div>
+                </div>
+            </div>
+        `;
+        messageList.appendChild(messageDiv);
+        messageList.scrollTop = messageList.scrollHeight;
+    }
+
+    if (messageForm) {
+        messageForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const messageInput = this.querySelector('textarea[name="content"]');
+            const message = messageInput.value.trim();
+            const conversationId = this.dataset.conversationId;
+            if (message && conversationId) {
+                sendMessage(conversationId, message);
+                messageInput.value = '';
+            }
+        });
     }
 }
 
-function addMessageToChat(message) {
-    const chatWindow = document.querySelector('#chat-window');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `flex ${message.is_user ? 'justify-end' : 'justify-start'} mb-4`;
-
-    const currentUserName = document.querySelector('#current-user-name').textContent;
-    const aiName = document.querySelector('#ai-name').textContent;
-
-    messageDiv.innerHTML = `
-        <div class="max-w-xs lg:max-w-md">
-            <div class="text-sm font-semibold mb-1 ${message.is_user ? 'text-right text-blue-600' : 'text-left text-gray-600'}">
-                <span class="sender-name">${message.is_user ? currentUserName : aiName}</span>
-            </div>
-            <div class="p-3 rounded-lg ${message.is_user ? 'bg-blue-500 text-white' : 'bg-gray-200'}">
-                <div class="text-sm message-content">${message.content}</div>
-                <div class="text-xs mt-1 ${message.is_user ? 'text-blue-200' : 'text-gray-500'} message-timestamp">${message.timestamp}</div>
-            </div>
-        </div>
-    `;
-
-    chatWindow.appendChild(messageDiv);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-}
-
-function getCsrfToken() {
-    return document.querySelector('[name=csrfmiddlewaretoken]').value;
-}
-
-document.querySelector('#send-button').addEventListener('click', sendMessage);
-document.querySelector('#message-input').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        sendMessage();
-    }
-});
+// Initialize chat when the script loads
+document.addEventListener('DOMContentLoaded', initializeChat);

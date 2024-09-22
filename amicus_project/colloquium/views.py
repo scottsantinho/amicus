@@ -73,6 +73,8 @@ class ConversationDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['ai_profile'] = self.object.user.aiprofile
         context['messages'] = self.object.messages.all().order_by('timestamp')
+        context['user_name'] = self.request.user.profile.user_name or self.request.user.username
+        context['ai_name'] = self.object.user.aiprofile.ai_name or "AI Assistant"
         return context
 
 # Define a view for creating a new message, requiring login
@@ -219,8 +221,7 @@ def delete_conversation(request, pk):
     conversation = get_object_or_404(Conversation, pk=pk, user=request.user)
     conversation.is_active = False
     conversation.save()
-    messages.success(request, f"Conversation {pk} has been deleted.")
-    return redirect('conversation_list')
+    return JsonResponse({'success': True, 'message': f"Conversation {pk} has been deleted."})
 
 # Define a view for sending a message, requiring login and POST method
 @login_required
@@ -261,8 +262,8 @@ def send_message(request, conversation_id):
 
         return JsonResponse({
             'success': True, 
-            'user_message': {'name': user_name, 'content': content},
-            'ai_message': {'name': ai_name, 'content': ai_response}
+            'user_message': {'name': user_name, 'content': content, 'timestamp': message.timestamp.strftime("%B %d, %Y %H:%M")},
+            'ai_message': {'name': ai_name, 'content': ai_response, 'timestamp': ai_message.timestamp.strftime("%B %d, %Y %H:%M")}
         })
     
     print("No message content provided")  # Debug print

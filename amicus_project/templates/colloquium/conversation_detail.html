@@ -5,7 +5,7 @@
             <div class="flex {% if message.is_user %}justify-end{% else %}justify-start{% endif %} mb-4">
                 <div class="max-w-xs lg:max-w-md">
                     <div class="text-sm font-semibold mb-1 {% if message.is_user %}text-right text-blue-600{% else %}text-left text-gray-600{% endif %}">
-                        {{ message.is_user|yesno:"User,AI" }}
+                        {% if message.is_user %}{{ user_name }}{% else %}{{ ai_name }}{% endif %}
                     </div>
                     <div class="p-3 rounded-lg {% if message.is_user %}bg-blue-500 text-white{% else %}bg-gray-200{% endif %}">
                         <div class="text-sm">{{ message.content }}</div>
@@ -37,6 +37,10 @@
         const messageList = document.getElementById('message-list');
         const messageForm = document.getElementById('message-form');
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const conversationId = "{{ conversation.pk }}";
+
+        // Store the conversation ID in localStorage
+        localStorage.setItem('selectedConversationId', conversationId);
 
         function createMessageElement(name, content, isUser, timestamp) {
             const messageDiv = document.createElement('div');
@@ -73,8 +77,6 @@
             const content = formData.get('content');
 
             if (content.trim()) {
-                const conversationId = "{{ conversation.pk }}";
-
                 try {
                     const response = await fetch(`/conversations/${conversationId}/new_message/`, {
                         method: 'POST',
