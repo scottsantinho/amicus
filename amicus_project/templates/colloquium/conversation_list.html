@@ -12,7 +12,7 @@
             {% for conv in conversations %}
                 <li class="mb-2 flex justify-between items-center">
                     <a href="#" class="load-conversation block p-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-300 flex-grow mr-2" data-conversation-id="{{ conv.pk }}">
-                        Conversation {{ conv.pk }}
+                        Conversation n°{{ forloop.revcounter }}
                     </a>
                     <span class="conversation-actions">
                         <button class="edit-conversation text-blue-500 hover:text-blue-700 mr-2" data-conversation-id="{{ conv.pk }}">
@@ -91,12 +91,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function createNewConversation() {
-    fetch('{% url 'new_conversation' %}', {
+    fetch("{% url 'new_conversation' %}", {
         method: 'POST',
         headers: {
             'X-CSRFToken': '{{ csrf_token }}',
             'Content-Type': 'application/json'
-        },
+        }
     })
     .then(response => response.json())
     .then(data => {
@@ -107,11 +107,12 @@ function createNewConversation() {
             }
 
             const conversationList = document.getElementById('conversation-list');
+            const newConversationNumber = conversationList.children.length + 1;
             const newConversationItem = document.createElement('li');
             newConversationItem.className = 'mb-2 flex justify-between items-center';
             newConversationItem.innerHTML = `
                 <a href="#" class="load-conversation block p-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-300 flex-grow mr-2" data-conversation-id="${data.conversation_id}">
-                    Conversation ${data.conversation_id}
+                    Conversation n°${newConversationNumber}
                 </a>
                 <span class="conversation-actions">
                     <button class="edit-conversation text-blue-500 hover:text-blue-700 mr-2" data-conversation-id="${data.conversation_id}">
@@ -178,26 +179,21 @@ function deleteConversation(conversationId) {
                 noConversationsElem.id = 'no-conversations';
                 noConversationsElem.textContent = 'No conversations yet.';
                 conversationList.appendChild(noConversationsElem);
-
-                // Clear the chat window
-                document.getElementById('conversation-content').innerHTML = `
-                    <div class="flex-grow flex items-center justify-center bg-gray-50">
-                        <p class="text-2xl text-gray-400 font-light">Please start a new conversation or select an existing one.</p>
-                    </div>
-                `;
-                document.getElementById('conversation-title').textContent = 'No Conversation Selected';
-            } else if (conversationId === localStorage.getItem('selectedConversationId')) {
-                // If the deleted conversation was the selected one, load the first available conversation
-                const firstConversation = document.querySelector('.load-conversation');
-                if (firstConversation) {
-                    loadConversation(firstConversation.getAttribute('data-conversation-id'));
-                }
+            } else {
+                // Update the numbering of remaining conversations
+                updateConversationNumbering();
             }
 
-            // Clear the selected conversation from localStorage if it was deleted
-            if (conversationId === localStorage.getItem('selectedConversationId')) {
-                localStorage.removeItem('selectedConversationId');
-            }
+            // Clear the chat window
+            document.getElementById('conversation-content').innerHTML = `
+                <div class="flex-grow flex items-center justify-center bg-gray-50">
+                    <p class="text-2xl text-gray-400 font-light">Create a conversation or select an existing one.</p>
+                </div>
+            `;
+            document.getElementById('conversation-title').textContent = 'No Conversation Selected';
+
+            // Clear the selected conversation from localStorage
+            localStorage.removeItem('selectedConversationId');
         } else {
             console.error('Failed to delete conversation');
         }
@@ -205,12 +201,22 @@ function deleteConversation(conversationId) {
     .catch(error => console.error('Error:', error));
 }
 
+function updateConversationNumbering() {
+    const conversationList = document.getElementById('conversation-list');
+    const conversations = conversationList.querySelectorAll('.load-conversation');
+    conversations.forEach((conv, index) => {
+        conv.textContent = `Conversation n°${conversations.length - index}`;
+    });
+}
+
 function loadConversation(conversationId) {
     fetch(`/conversations/${conversationId}/`)
     .then(response => response.text())
     .then(html => {
         document.getElementById('conversation-content').innerHTML = html;
-        document.getElementById('conversation-title').textContent = `Conversation ${conversationId}`;
+        const conversationElement = document.querySelector(`.load-conversation[data-conversation-id="${conversationId}"]`);
+        const conversationTitle = conversationElement ? conversationElement.textContent.trim() : `Conversation ${conversationId}`;
+        document.getElementById('conversation-title').textContent = conversationTitle;
         
         document.querySelectorAll('.load-conversation').forEach(el => {
             el.classList.remove('bg-blue-200');
