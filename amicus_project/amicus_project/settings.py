@@ -35,8 +35,6 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'nucleus', # Core functionality
     'colloquium', # Conversation handling
-    'vox', # Voice assistant
-    'imago', # Image recognition
     #Django Apps
     'django.contrib.admin',
     'django.contrib.auth',

@@ -37,7 +37,7 @@ def update_profile(request):
     ai_profile, created = AIProfile.objects.get_or_create(user=request.user)
     
     if request.method == 'POST':
-        profile_form = ProfileUpdateForm(request.POST, instance=user_profile)
+        profile_form = ProfileForm(request.POST, instance=user_profile)
         ai_profile_form = AIProfileForm(request.POST, instance=ai_profile)
         if profile_form.is_valid() and ai_profile_form.is_valid():
             profile_form.save()
@@ -45,7 +45,7 @@ def update_profile(request):
             messages.success(request, 'Your profile has been updated successfully.')
             return redirect('profile')
     else:
-        profile_form = ProfileUpdateForm(instance=user_profile)
+        profile_form = ProfileForm(instance=user_profile)
         ai_profile_form = AIProfileForm(instance=ai_profile)
     
     return render(request, 'nucleus/profile.html', {
