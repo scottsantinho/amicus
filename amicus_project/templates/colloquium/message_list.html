@@ -1,23 +1,35 @@
-{% for message in messages %}
-    <div class="flex {% if message.is_user %}justify-end{% else %}justify-start{% endif %} mb-4">
-        <div class="max-w-xs lg:max-w-md">
-            <!-- Sender's Name -->
-            <div class="text-sm font-semibold mb-1 {% if message.is_user %}text-right text-blue-600{% else %}text-left text-gray-600{% endif %}">
-                <span class="sender-name">
-                    {% if message.is_user %}
-                        {{ message.conversation.user.profile.user_name|default:message.conversation.user.username }}
-                    {% else %}
-                        {{ ai_name }}
-                    {% endif %}
-                </span>
-            </div>
-            <!-- Message Content and Timestamp -->
-            <div class="p-3 rounded-lg {% if message.is_user %}bg-blue-500 text-white{% else %}bg-gray-200{% endif %}">
-                <div class="text-sm message-content">{{ message.content }}</div>
-                <div class="text-xs mt-1 {% if message.is_user %}text-blue-200{% else %}text-gray-500{% endif %} message-timestamp">
-                    {{ message.timestamp|date:"F d, Y H:i" }}
+    <!-- Start of Selection -->
+    <!-- Loop through each message in the messages list -->
+    {% for message in messages %}
+        <!-- Define a flex container for the message with conditional justification based on sender and margin-bottom -->
+        <div class="flex {% if message.is_user %}justify-end{% else %}justify-start{% endif %} mb-4">
+            <!-- Set maximum width for the message container -->
+            <div class="max-w-xs lg:max-w-md">
+                <!-- Sender's Name -->
+                <!-- Define a div for the sender's name with conditional text alignment and color -->
+                <div class="text-sm font-semibold mb-1 {% if message.is_user %}text-right text-blue-600{% else %}text-left text-gray-600{% endif %}">
+                    <!-- Span to display the sender's name -->
+                    <span class="sender-name">
+                        <!-- Check if the message is sent by the user -->
+                        {% if message.is_user %}
+                            <!-- Display the user's profile name, defaulting to username if profile name is not set -->
+                            {{ message.conversation.user.profile.user_name|default:message.conversation.user.username }}
+                        {% else %}
+                            <!-- Display the AI's name -->
+                            {{ ai_name }}
+                        {% endif %}
+                    </span>
+                </div>
+                <!-- Message Content and Timestamp -->
+                <!-- Define a div for the message content and timestamp with conditional styling based on sender -->
+                <div class="p-3 rounded-lg {% if message.is_user %}bg-blue-500 text-white{% else %}bg-gray-200{% endif %}">
+                    <!-- Display the message content -->
+                    <div class="text-sm message-content">{{ message.content }}</div>
+                    <!-- Display the message timestamp with conditional text color -->
+                    <div class="text-xs mt-1 {% if message.is_user %}text-blue-200{% else %}text-gray-500{% endif %} message-timestamp">
+                        {{ message.timestamp|date:"F d, Y H:i" }}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-{% endfor %}
+    {% endfor %}

@@ -19,11 +19,17 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+# Define the URL patterns for the project
 urlpatterns = [
+    # URL pattern for the admin site
     path('admin/', admin.site.urls),
+    # URL pattern for the conversations app
     path('conversations/', include('colloquium.urls')),  # Make sure this line is present
+    # URL pattern for the nucleus app, which handles the root URL
     path('', include('nucleus.urls')),  # Include the nucleus app URLs
 ]
 
+# Add static file handling for development environment
 if settings.DEBUG:
+    # Extend urlpatterns to serve static files during development
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -1,36 +1,55 @@
+<!-- Extend the base template 'nucleus/base.html' -->
 {% extends 'nucleus/base.html' %}
+<!-- Load static files -->
 {% load static %}
 
+<!-- Define the title block for this page -->
 {% block title %}Your Profile{% endblock %}
 
+<!-- Begin the content block -->
 {% block content %}
+<!-- Create a container div with horizontal padding and auto margins -->
 <div class="container mx-auto px-4">
+    <!-- Add a heading for the profile page -->
     <h1 class="text-3xl font-bold mb-6 text-center">Profile</h1>
     
+    <!-- Create a form for profile information -->
     <form method="post">
+        <!-- Add CSRF token for security -->
         {% csrf_token %}
+        <!-- Create a flex container for user and AI profiles -->
         <div class="flex flex-row gap-6">
-            <!-- User Profile -->
+            <!-- User Profile section -->
             <div class="w-1/2">
+                <!-- Add a subheading for user profile -->
                 <h2 class="text-2xl font-semibold mb-4">User Profile</h2>
+                <!-- Create a container for user profile fields -->
                 <div class="space-y-4">
                     <!-- Name field -->
                     <div>
+                        <!-- Label for name input -->
                         <label for="{{ form.user_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <!-- Input field for name -->
                         <input type="text" name="user_name" id="{{ form.user_name.id_for_label }}" value="{{ form.user_name.value|default:'' }}" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 ease-in-out hover:shadow-md">
                     </div>
                     
                     <!-- Age field -->
                     <div>
+                        <!-- Label for age input -->
                         <label for="{{ form.user_age.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                        <!-- Input field for age -->
                         <input type="number" name="user_age" id="{{ form.user_age.id_for_label }}" value="{{ form.user_age.value|default:'' }}" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 ease-in-out hover:shadow-md">
                     </div>
                     
                     <!-- Gender field -->
                     <div>
+                        <!-- Label for gender select -->
                         <label for="{{ form.user_gender.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                        <!-- Select field for gender -->
                         <select name="user_gender" id="{{ form.user_gender.id_for_label }}" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 ease-in-out hover:shadow-md">
+                            <!-- Loop through gender choices -->
                             {% for value, label in form.user_gender.field.choices %}
+                                <!-- Create an option for each gender choice -->
                                 <option value="{{ value }}" {% if form.user_gender.value == value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
                         </select>
@@ -38,51 +57,66 @@
                     
                     <!-- Description field -->
                     <div>
+                        <!-- Label for description textarea -->
                         <label for="{{ form.user_description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <!-- Textarea for user description -->
                         <textarea name="user_description" id="{{ form.user_description.id_for_label }}" rows="5" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 ease-in-out resize-none hover:shadow-md">{{ form.user_description.value|default:'' }}</textarea>
                     </div>
                 </div>
             </div>
             
-            <!-- AI Profile -->
+            <!-- AI Profile section -->
             <div class="w-1/2">
+                <!-- Add a subheading for AI profile -->
                 <h2 class="text-2xl font-semibold mb-4">AI Profile</h2>
+                <!-- Create a container for AI profile fields -->
                 <div class="space-y-4">
                     <!-- AI Name field -->
                     <div>
+                        <!-- Label for AI name input -->
                         <label for="{{ ai_form.ai_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">AI Name</label>
+                        <!-- Input field for AI name -->
                         <input type="text" name="ai_name" id="{{ ai_form.ai_name.id_for_label }}" value="{{ ai_form.ai_name.value|default:'' }}" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 ease-in-out hover:shadow-md">
                     </div>
                     
                     <!-- AI Age field -->
                     <div>
+                        <!-- Label for AI age input -->
                         <label for="{{ ai_form.ai_age.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">AI Age</label>
+                        <!-- Input field for AI age -->
                         <input type="number" name="ai_age" id="{{ ai_form.ai_age.id_for_label }}" value="{{ ai_form.ai_age.value|default:'' }}" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 ease-in-out hover:shadow-md">
                     </div>
                     
                     <!-- AI Physical Appearance field -->
                     <div>
+                        <!-- Label for AI physical appearance textarea -->
                         <label for="{{ ai_form.ai_physical_appearance.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">AI Physical Appearance</label>
+                        <!-- Textarea for AI physical appearance -->
                         <textarea name="ai_physical_appearance" id="{{ ai_form.ai_physical_appearance.id_for_label }}" rows="3" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 ease-in-out resize-none hover:shadow-md">{{ ai_form.ai_physical_appearance.value|default:'' }}</textarea>
                     </div>
                     
                     <!-- AI Personality field -->
                     <div>
+                        <!-- Label for AI personality textarea -->
                         <label for="{{ ai_form.ai_personality.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">AI Personality</label>
+                        <!-- Textarea for AI personality -->
                         <textarea name="ai_personality" id="{{ ai_form.ai_personality.id_for_label }}" rows="3" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 ease-in-out resize-none hover:shadow-md">{{ ai_form.ai_personality.value|default:'' }}</textarea>
                     </div>
                     
                     <!-- AI Hobbies field -->
                     <div>
+                        <!-- Label for AI hobbies textarea -->
                         <label for="{{ ai_form.ai_hobbies.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">AI Hobbies</label>
+                        <!-- Textarea for AI hobbies -->
                         <textarea name="ai_hobbies" id="{{ ai_form.ai_hobbies.id_for_label }}" rows="3" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 ease-in-out resize-none hover:shadow-md">{{ ai_form.ai_hobbies.value|default:'' }}</textarea>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Center the save changes button -->
+        <!-- Container for the save changes button -->
         <div class="text-center mt-8">
+            <!-- Submit button for the form -->
             <button type="submit" class="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
                 Save Changes
             </button>
@@ -91,6 +125,7 @@
 </div>
 {% endblock %}
 
+<!-- Begin the extra_css block -->
 {% block extra_css %}
 <style>
     /* Custom styles for form fields are now applied directly in the HTML */

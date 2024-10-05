@@ -1,15 +1,25 @@
-{% extends 'base.html' %}
-
-{% block content %}
-<div id="chat-window" class="overflow-y-auto h-[calc(100vh-200px)]">
-    {% include 'colloquium/message_list.html' %}
-</div>
-
-<form id="chat-form" class="mt-4">
-    {% csrf_token %}
-    <input type="text" id="message-input" class="w-full p-2 border rounded" placeholder="Type your message...">
-    <button type="button" id="send-button" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded">Send</button>
-</form>
-
-<script src="{% static 'js/chat.js' %}"></script>
-{% endblock %}
+ <!-- Start of Selection -->
+ <!-- Extend the base template to use common layout and styling across pages -->
+ {% extends 'base.html' %}
+ 
+ <!-- Begin the content block where page-specific content will be placed -->
+ {% block content %}
+     <!-- Create a div to act as the chat window, allowing overflow content to be scrollable and setting its height dynamically based on the viewport -->
+     <div id="chat-window" class="overflow-y-auto h-[calc(100vh-200px)]">
+         <!-- Include the message list template, which contains the list of chat messages -->
+         {% include 'colloquium/message_list.html' %}
+     </div>
+     
+     <!-- Create a form for sending chat messages with top margin for spacing -->
+     <form id="chat-form" class="mt-4">
+         <!-- Include CSRF token to protect against Cross-Site Request Forgery attacks -->
+         {% csrf_token %}
+         <!-- Create a text input field for the user to type their message, styled with full width, padding, border, and rounded corners -->
+         <input type="text" id="message-input" class="w-full p-2 border rounded" placeholder="Type your message...">
+         <!-- Create a button to send the message, styled with top margin, padding, background color, text color, and rounded corners -->
+         <button type="button" id="send-button" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded">Send</button>
+     </form>
+     
+     <!-- Include the external JavaScript file for handling chat functionality -->
+     <script src="{% static 'js/chat.js' %}"></script>
+ {% endblock %}

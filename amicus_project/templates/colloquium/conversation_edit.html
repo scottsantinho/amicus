@@ -1,10 +1,19 @@
-{% extends 'base.html' %}
-
-{% block content %}
-  <h2>Edit Conversation Name</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save</button>
-  </form>
-{% endblock %}
+ <!-- Start of Selection -->
+ <!-- Extends the base.html template to provide consistency across pages -->
+ {% extends 'base.html' %}
+ 
+ <!-- Begin the content block to insert page-specific content -->
+ {% block content %}
+   <!-- Header for the edit conversation name form -->
+   <h2>Edit Conversation Name</h2>
+   <!-- Start of the form, using POST method to submit data -->
+   <form method="post">
+     <!-- CSRF token for security against Cross-Site Request Forgery -->
+     {% csrf_token %}
+     <!-- Render the form fields as paragraphs for better formatting -->
+     {{ form.as_p }}
+     <!-- Submit button to save the edited conversation name -->
+     <button type="submit">Save</button>
+   </form>
+ <!-- End of the content block -->
+ {% endblock %}

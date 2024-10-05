@@ -1,11 +1,21 @@
+<!-- Start of Selection -->
+<!-- Define a hidden message template container used for cloning messages dynamically -->
 <div class="message-template" style="display: none;">
+    <!-- Create a flex container with bottom margin and data attribute indicating if the message is from the user -->
     <div class="flex mb-4" data-user-message="{IS_USER}">
+        <!-- Set maximum width for the message container on small and large screens -->
         <div class="max-w-xs lg:max-w-md">
+            <!-- Define sender's name with styling and data attribute for dynamic content -->
             <div class="text-sm font-semibold mb-1 sender-name" data-sender-name="{SENDER_NAME}"></div>
+            <!-- Create a message bubble with padding and rounded corners -->
             <div class="p-3 rounded-lg message-bubble">
+                <!-- Container for the message content with small text size -->
                 <div class="text-sm message-content"></div>
+                <!-- Container for the message timestamp with extra small text size and top margin -->
                 <div class="text-xs mt-1 message-timestamp"></div>
             </div>
         </div>
     </div>
 </div>
+<!-- End of Selection -->
+```

@@ -1,282 +1,360 @@
+<!-- Start of Selection -->
 {% extends 'nucleus/base.html' %}
 {% load static %}
 
+<!-- Define the title block with the text "Your Conversations" -->
 {% block title %}Your Conversations{% endblock %}
 
+<!-- Begin the content block to insert page-specific content -->
 {% block content %}
-<div class="flex h-screen">
-    <div class="w-full flex bg-white shadow-lg overflow-hidden">
-        <!-- Sidebar -->
-        <div class="w-1/3 bg-gray-50 p-6 overflow-y-auto border-r border-gray-200">
-            <h2 class="text-2xl font-bold mb-4 text-gray-800">Your Conversations</h2>
-            <ul id="conversation-list" class="space-y-2">
-                {% for conv in conversations %}
-                    <li class="flex justify-between items-center">
-                        <a href="#" class="load-conversation block p-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-300 flex-grow mr-2" data-conversation-id="{{ conv.pk }}">
-                            {{ conv.display_name }}
-                        </a>
-                        <span class="conversation-actions flex">
-                            <button class="edit-conversation text-blue-500 hover:text-blue-700 p-1" data-conversation-id="{{ conv.pk }}">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                </svg>
-                            </button>
-                            <button class="delete-conversation text-red-500 hover:text-red-700 p-1" data-conversation-id="{{ conv.pk }}">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </span>
-                    </li>
-                {% empty %}
-                    <li id="no-conversations" class="text-gray-500 italic">No conversations yet.</li>
-                {% endfor %}
-            </ul>
-            <button id="new-conversation-btn" class="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-                New Conversation
-            </button>
-        </div>
-
-        <!-- Chat Window -->
-        <div id="chat-window" class="w-2/3 flex flex-col bg-white">
-            <div class="p-4 border-b border-gray-200">
-                <h2 id="conversation-title" class="text-xl font-semibold text-gray-800">{% if conversation %}{{ conversation.display_name }}{% else %}No Conversation Selected{% endif %}</h2>
+    <!-- Create a flex container that takes the full height of the viewport -->
+    <div class="flex h-screen">
+        <!-- Create a full-width flex container with white background, shadow, and hidden overflow -->
+        <div class="w-full flex bg-white shadow-lg overflow-hidden">
+            <!-- Sidebar section for listing conversations -->
+            <div class="w-1/3 bg-gray-50 p-6 overflow-y-auto border-r border-gray-200">
+                <!-- Header for the conversations list -->
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">Your Conversations</h2>
+                <!-- Unordered list to display conversation items with vertical spacing -->
+                <ul id="conversation-list" class="space-y-2">
+                    <!-- Loop through each conversation in the conversations context -->
+                    {% for conv in conversations %}
+                        <!-- List item with flex layout to justify content between and align items center -->
+                        <li class="flex justify-between items-center">
+                            <!-- Anchor tag to load a conversation when clicked, with styling and data attribute for conversation ID -->
+                            <a href="#" class="load-conversation block p-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-300 flex-grow mr-2" data-conversation-id="{{ conv.pk }}">
+                                {{ conv.display_name }}
+                            </a>
+                            <!-- Span to contain action buttons for editing and deleting the conversation -->
+                            <span class="conversation-actions flex">
+                                <!-- Button to edit the conversation, styled with blue text and hover effects, includes SVG icon -->
+                                <button class="edit-conversation text-blue-500 hover:text-blue-700 p-1" data-conversation-id="{{ conv.pk }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                    </svg>
+                                </button>
+                                <!-- Button to delete the conversation, styled with red text and hover effects, includes SVG icon -->
+                                <button class="delete-conversation text-red-500 hover:text-red-700 p-1" data-conversation-id="{{ conv.pk }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </span>
+                        </li>
+                    {% empty %}
+                        <!-- List item to display when there are no conversations -->
+                        <li id="no-conversations" class="text-gray-500 italic">No conversations yet.</li>
+                    {% endfor %}
+                </ul>
+                <!-- Button to create a new conversation, styled with blue background and hover effects -->
+                <button id="new-conversation-btn" class="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                    New Conversation
+                </button>
             </div>
-            <div id="conversation-content" class="flex-grow overflow-y-auto">
-                {% if conversation %}
-                    {% include "colloquium/conversation_detail.html" with conversation=conversation form=form %}
-                {% else %}
-                    <div class="flex-grow flex items-center justify-center bg-gray-50">
-                        <p class="text-2xl text-gray-400 font-light">Select a conversation or start a new one.</p>
-                    </div>
-                {% endif %}
+
+            <!-- Chat Window section to display the selected conversation -->
+            <div id="chat-window" class="w-2/3 flex flex-col bg-white">
+                <!-- Header section with border bottom for the conversation title -->
+                <div class="p-4 border-b border-gray-200">
+                    <!-- Heading to display the conversation title or a default message -->
+                    <h2 id="conversation-title" class="text-xl font-semibold text-gray-800">{% if conversation %}{{ conversation.display_name }}{% else %}No Conversation Selected{% endif %}</h2>
+                </div>
+                <!-- Content area to display the conversation details or a prompt to select/create one -->
+                <div id="conversation-content" class="flex-grow overflow-y-auto">
+                    {% if conversation %}
+                        <!-- Include the conversation detail template with conversation and form context -->
+                        {% include "colloquium/conversation_detail.html" with conversation=conversation form=form %}
+                    {% else %}
+                        <!-- Div to prompt the user to select or create a conversation -->
+                        <div class="flex-grow flex items-center justify-center bg-gray-50">
+                            <p class="text-2xl text-gray-400 font-light">Select a conversation or start a new one.</p>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script src="{% static 'js/chat.js' %}"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const selectedConversationId = localStorage.getItem('selectedConversationId');
-    if (selectedConversationId) {
-        loadConversation(selectedConversationId);
-    }
-
-    document.getElementById('new-conversation-btn').addEventListener('click', createNewConversation);
-
-    document.querySelectorAll('.load-conversation').forEach(function(element) {
-        element.addEventListener('click', function(e) {
-            e.preventDefault();
-            var conversationId = this.getAttribute('data-conversation-id');
-            loadConversation(conversationId);
-        });
-    });
-
-    // Add event listeners for delete buttons
-    document.querySelectorAll('.delete-conversation').forEach(function(element) {
-        element.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (confirm('Are you sure you want to delete this conversation?')) {
-                deleteConversation(this.getAttribute('data-conversation-id'));
-            }
-        });
-    });
-
-    // Add event listeners for edit buttons
-    document.querySelectorAll('.edit-conversation').forEach(function(element) {
-        element.addEventListener('click', function(e) {
-            e.preventDefault();
-            editConversation(this.getAttribute('data-conversation-id'));
-        });
-    });
-});
-
-function createNewConversation() {
-    fetch("{% url 'new_conversation' %}", {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/json'
+    <!-- Include the external JavaScript file for chat functionality -->
+    <script src="{% static 'js/chat.js' %}"></script>
+    <!-- Begin inline JavaScript for handling conversation interactions -->
+    <script>
+    // Add an event listener that triggers when the DOM content is fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Retrieve the selected conversation ID from localStorage
+        const selectedConversationId = localStorage.getItem('selectedConversationId');
+        // If a conversation ID is found, load that conversation
+        if (selectedConversationId) {
+            loadConversation(selectedConversationId);
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            const noConversationsElem = document.getElementById('no-conversations');
-            if (noConversationsElem) {
-                noConversationsElem.remove();
-            }
 
-            const conversationList = document.getElementById('conversation-list');
-            const newConversationNumber = conversationList.children.length + 1;
-            const newConversationItem = document.createElement('li');
-            newConversationItem.className = 'flex justify-between items-center';
-            newConversationItem.innerHTML = `
-                <a href="#" class="load-conversation block p-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-300 flex-grow mr-2" data-conversation-id="${data.conversation_id}">
-                    Conversation n°${newConversationNumber}
-                </a>
-                <span class="conversation-actions flex">
-                    <button class="edit-conversation text-blue-500 hover:text-blue-700 p-1" data-conversation-id="${data.conversation_id}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                        </svg>
-                    </button>
-                    <button class="delete-conversation text-red-500 hover:text-red-700 p-1" data-conversation-id="${data.conversation_id}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </span>
-            `;
-            conversationList.insertBefore(newConversationItem, conversationList.firstChild);
+        // Add a click event listener to the new conversation button to create a new conversation
+        document.getElementById('new-conversation-btn').addEventListener('click', createNewConversation);
 
-            newConversationItem.querySelector('.load-conversation').addEventListener('click', function(e) {
+        // Select all elements with the class 'load-conversation' and add a click event listener to each
+        document.querySelectorAll('.load-conversation').forEach(function(element) {
+            element.addEventListener('click', function(e) {
+                // Prevent the default anchor behavior
                 e.preventDefault();
-                loadConversation(data.conversation_id);
+                // Get the conversation ID from the data attribute
+                var conversationId = this.getAttribute('data-conversation-id');
+                // Load the selected conversation
+                loadConversation(conversationId);
             });
+        });
 
-            newConversationItem.querySelector('.delete-conversation').addEventListener('click', function(e) {
+        // Select all elements with the class 'delete-conversation' and add a click event listener to each
+        document.querySelectorAll('.delete-conversation').forEach(function(element) {
+            element.addEventListener('click', function(e) {
+                // Prevent the default button behavior
                 e.preventDefault();
+                // Confirm with the user before deleting the conversation
                 if (confirm('Are you sure you want to delete this conversation?')) {
-                    deleteConversation(data.conversation_id);
+                    deleteConversation(this.getAttribute('data-conversation-id'));
                 }
             });
-
-            newConversationItem.querySelector('.edit-conversation').addEventListener('click', function(e) {
-                e.preventDefault();
-                editConversation(data.conversation_id);
-            });
-
-            loadConversation(data.conversation_id);
-        } else {
-            console.error('Failed to create new conversation');
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
-
-function deleteConversation(conversationId) {
-    fetch(`/conversations/${conversationId}/delete/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/json'
-        },
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Remove the conversation from the list
-            const conversationElement = document.querySelector(`.load-conversation[data-conversation-id="${conversationId}"]`);
-            if (conversationElement) {
-                conversationElement.closest('li').remove();
-            }
-
-            // Check if it was the last conversation
-            const conversationList = document.getElementById('conversation-list');
-            if (conversationList.children.length === 0) {
-                // Add the "No conversations yet" message
-                const noConversationsElem = document.createElement('li');
-                noConversationsElem.id = 'no-conversations';
-                noConversationsElem.className = 'text-gray-500 italic';
-                noConversationsElem.textContent = 'No conversations yet.';
-                conversationList.appendChild(noConversationsElem);
-            } else {
-                // Update the numbering of remaining conversations
-                updateConversationNumbering();
-            }
-
-            // Clear the chat window
-            document.getElementById('conversation-content').innerHTML = `
-                <div class="flex-grow flex items-center justify-center bg-gray-50">
-                    <p class="text-2xl text-gray-400 font-light">Create a conversation or select an existing one.</p>
-                </div>
-            `;
-            document.getElementById('conversation-title').textContent = 'No Conversation Selected';
-
-            // Clear the selected conversation from localStorage
-            localStorage.removeItem('selectedConversationId');
-        } else {
-            console.error('Failed to delete conversation');
-        }
-    })
-    .catch(error => console.error('Error:', error));
-}
-
-function updateConversationNumbering() {
-    const conversationList = document.getElementById('conversation-list');
-    const conversations = conversationList.querySelectorAll('.load-conversation');
-    conversations.forEach((conv, index) => {
-        conv.textContent = `Conversation n°${conversations.length - index}`;
-    });
-}
-
-function loadConversation(conversationId) {
-    fetch(`/conversations/${conversationId}/`)
-    .then(response => response.text())
-    .then(html => {
-        document.getElementById('conversation-content').innerHTML = html;
-        const conversationElement = document.querySelector(`.load-conversation[data-conversation-id="${conversationId}"]`);
-        const conversationTitle = conversationElement ? conversationElement.textContent.trim() : `Conversation ${conversationId}`;
-        const titleElement = document.getElementById('conversation-title');
-        titleElement.textContent = conversationTitle;
-        titleElement.dataset.conversationId = conversationId;
-        
-        document.querySelectorAll('.load-conversation').forEach(el => {
-            el.classList.remove('bg-blue-200');
-            el.classList.add('bg-gray-200');
         });
-        const activeConversation = document.querySelector(`.load-conversation[data-conversation-id="${conversationId}"]`);
-        if (activeConversation) {
-            activeConversation.classList.remove('bg-gray-200');
-            activeConversation.classList.add('bg-blue-200');
-        }
 
-        localStorage.setItem('selectedConversationId', conversationId);
+        // Select all elements with the class 'edit-conversation' and add a click event listener to each
+        document.querySelectorAll('.edit-conversation').forEach(function(element) {
+            element.addEventListener('click', function(e) {
+                // Prevent the default button behavior
+                e.preventDefault();
+                // Trigger the edit conversation function with the conversation ID
+                editConversation(this.getAttribute('data-conversation-id'));
+            });
+        });
+    });
 
-        const messageForm = document.querySelector('#message-form');
-        if (messageForm) {
-            messageForm.dataset.conversationId = conversationId;
-        }
-
-        initializeChat();
-    })
-    .catch(error => console.error('Error:', error));
-}
-
-function editConversation(conversationId) {
-    const newName = prompt("Enter a new name for this conversation:");
-    if (newName !== null && newName.trim() !== "") {
-        fetch(`/conversations/${conversationId}/edit/`, {
+    // Function to create a new conversation by sending a POST request
+    function createNewConversation() {
+        fetch("{% url 'new_conversation' %}", {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({ name: newName })
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
         })
         .then(response => response.json())
         .then(data => {
+            // If the creation is successful
             if (data.success) {
-                // Update the conversation name in the sidebar
-                const conversationElement = document.querySelector(`.load-conversation[data-conversation-id="${conversationId}"]`);
-                if (conversationElement) {
-                    conversationElement.textContent = newName;
+                // Remove the "No conversations yet" message if it exists
+                const noConversationsElem = document.getElementById('no-conversations');
+                if (noConversationsElem) {
+                    noConversationsElem.remove();
                 }
-                // Update the conversation title if it's the active conversation
-                const conversationTitle = document.getElementById('conversation-title');
-                if (conversationTitle && conversationTitle.dataset.conversationId === conversationId) {
-                    conversationTitle.textContent = newName;
-                }
-                // Refresh the conversation list
-                location.reload();
+
+                // Get the conversation list element
+                const conversationList = document.getElementById('conversation-list');
+                // Determine the new conversation number based on the current list length
+                const newConversationNumber = conversationList.children.length + 1;
+                // Create a new list item for the conversation
+                const newConversationItem = document.createElement('li');
+                newConversationItem.className = 'flex justify-between items-center';
+                // Set the inner HTML of the list item with the new conversation details
+                newConversationItem.innerHTML = `
+                    <a href="#" class="load-conversation block p-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition duration-300 flex-grow mr-2" data-conversation-id="${data.conversation_id}">
+                        Conversation n°${newConversationNumber}
+                    </a>
+                    <span class="conversation-actions flex">
+                        <button class="edit-conversation text-blue-500 hover:text-blue-700 p-1" data-conversation-id="${data.conversation_id}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                        </button>
+                        <button class="delete-conversation text-red-500 hover:text-red-700 p-1" data-conversation-id="${data.conversation_id}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </span>
+                `;
+                // Insert the new conversation at the beginning of the list
+                conversationList.insertBefore(newConversationItem, conversationList.firstChild);
+
+                // Add event listener to the new conversation's load button
+                newConversationItem.querySelector('.load-conversation').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    loadConversation(data.conversation_id);
+                });
+
+                // Add event listener to the new conversation's delete button
+                newConversationItem.querySelector('.delete-conversation').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to delete this conversation?')) {
+                        deleteConversation(data.conversation_id);
+                    }
+                });
+
+                // Add event listener to the new conversation's edit button
+                newConversationItem.querySelector('.edit-conversation').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    editConversation(data.conversation_id);
+                });
+
+                // Load the newly created conversation
+                loadConversation(data.conversation_id);
             } else {
-                console.error('Failed to update conversation name:', data.error);
+                // Log an error if the conversation creation failed
+                console.error('Failed to create new conversation');
             }
         })
+        // Catch and log any errors during the fetch operation
         .catch(error => console.error('Error:', error));
     }
-}
-</script>
+
+    // Function to delete a conversation by sending a POST request
+    function deleteConversation(conversationId) {
+        fetch(`/conversations/${conversationId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            // If deletion is successful
+            if (data.success) {
+                // Select the conversation element using the conversation ID
+                const conversationElement = document.querySelector(`.load-conversation[data-conversation-id="${conversationId}"]`);
+                // If the element exists, remove its closest list item
+                if (conversationElement) {
+                    conversationElement.closest('li').remove();
+                }
+
+                // Get the conversation list element
+                const conversationList = document.getElementById('conversation-list');
+                // If there are no more conversations, display the "No conversations yet" message
+                if (conversationList.children.length === 0) {
+                    const noConversationsElem = document.createElement('li');
+                    noConversationsElem.id = 'no-conversations';
+                    noConversationsElem.className = 'text-gray-500 italic';
+                    noConversationsElem.textContent = 'No conversations yet.';
+                    conversationList.appendChild(noConversationsElem);
+                } else {
+                    // Update the numbering of the remaining conversations
+                    updateConversationNumbering();
+                }
+
+                // Clear the chat window content and title
+                document.getElementById('conversation-content').innerHTML = `
+                    <div class="flex-grow flex items-center justify-center bg-gray-50">
+                        <p class="text-2xl text-gray-400 font-light">Create a conversation or select an existing one.</p>
+                    </div>
+                `;
+                document.getElementById('conversation-title').textContent = 'No Conversation Selected';
+
+                // Remove the selected conversation ID from localStorage
+                localStorage.removeItem('selectedConversationId');
+            } else {
+                // Log an error if the conversation deletion failed
+                console.error('Failed to delete conversation');
+            }
+        })
+        // Catch and log any errors during the fetch operation
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Function to update the numbering of conversations in the list
+    function updateConversationNumbering() {
+        // Get the conversation list element
+        const conversationList = document.getElementById('conversation-list');
+        // Select all conversation load elements
+        const conversations = conversationList.querySelectorAll('.load-conversation');
+        // Iterate through each conversation and update its text content with the new number
+        conversations.forEach((conv, index) => {
+            conv.textContent = `Conversation n°${conversations.length - index}`;
+        });
+    }
+
+    // Function to load a conversation's details by fetching its content
+    function loadConversation(conversationId) {
+        fetch(`/conversations/${conversationId}/`)
+        .then(response => response.text())
+        .then(html => {
+            // Insert the fetched HTML into the conversation content area
+            document.getElementById('conversation-content').innerHTML = html;
+            // Select the conversation element using the conversation ID
+            const conversationElement = document.querySelector(`.load-conversation[data-conversation-id="${conversationId}"]`);
+            // Determine the conversation title based on the element's text or default to the ID
+            const conversationTitle = conversationElement ? conversationElement.textContent.trim() : `Conversation ${conversationId}`;
+            // Get the title element and update its text content
+            const titleElement = document.getElementById('conversation-title');
+            titleElement.textContent = conversationTitle;
+            // Store the conversation ID in the title element's dataset
+            titleElement.dataset.conversationId = conversationId;
+            
+            // Remove active styling from all conversation elements
+            document.querySelectorAll('.load-conversation').forEach(el => {
+                el.classList.remove('bg-blue-200');
+                el.classList.add('bg-gray-200');
+            });
+            // Add active styling to the selected conversation element
+            const activeConversation = document.querySelector(`.load-conversation[data-conversation-id="${conversationId}"]`);
+            if (activeConversation) {
+                activeConversation.classList.remove('bg-gray-200');
+                activeConversation.classList.add('bg-blue-200');
+            }
+
+            // Store the selected conversation ID in localStorage
+            localStorage.setItem('selectedConversationId', conversationId);
+
+            // Select the message form and store the conversation ID in its dataset if it exists
+            const messageForm = document.querySelector('#message-form');
+            if (messageForm) {
+                messageForm.dataset.conversationId = conversationId;
+            }
+
+            // Initialize chat functionalities
+            initializeChat();
+        })
+        // Catch and log any errors during the fetch operation
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Function to edit a conversation's name by prompting the user and sending a POST request
+    function editConversation(conversationId) {
+        // Prompt the user to enter a new name for the conversation
+        const newName = prompt("Enter a new name for this conversation:");
+        // If the user entered a valid name
+        if (newName !== null && newName.trim() !== "") {
+            fetch(`/conversations/${conversationId}/edit/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                // Send the new name in the request body as JSON
+                body: JSON.stringify({ name: newName })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // If the update is successful
+                if (data.success) {
+                    // Select the conversation element and update its text content with the new name
+                    const conversationElement = document.querySelector(`.load-conversation[data-conversation-id="${conversationId}"]`);
+                    if (conversationElement) {
+                        conversationElement.textContent = newName;
+                    }
+                    // If the edited conversation is currently active, update the title
+                    const conversationTitle = document.getElementById('conversation-title');
+                    if (conversationTitle && conversationTitle.dataset.conversationId === conversationId) {
+                        conversationTitle.textContent = newName;
+                    }
+                    // Reload the page to refresh the conversation list
+                    location.reload();
+                } else {
+                    // Log an error if the conversation update failed
+                    console.error('Failed to update conversation name:', data.error);
+                }
+            })
+            // Catch and log any errors during the fetch operation
+            .catch(error => console.error('Error:', error));
+        }
+    }
+    </script>
 {% endblock %}
+<!-- End of Selection -->
+```

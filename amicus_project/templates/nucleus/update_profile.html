@@ -1,37 +1,60 @@
+<!-- Extend the base template -->
 {% extends 'nucleus/base.html' %}
 
+<!-- Set the page title -->
 {% block title %}Update Profile - Amicus Project{% endblock %}
 
+<!-- Start of content block -->
 {% block content %}
+<!-- Main container with maximum width and centered -->
 <div class="max-w-2xl mx-auto">
+    <!-- Header for profile update section -->
     <h2 class="text-2xl font-bold text-gray-800 mb-6">Update Your Profile</h2>
     
+    <!-- Form for updating profile -->
     <form method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <!-- CSRF token for security -->
         {% csrf_token %}
+        <!-- Container for profile form -->
         <div class="mb-6">
+            <!-- Render profile form as paragraphs -->
             {{ profile_form.as_p }}
         </div>
+        <!-- Header for AI profile section -->
         <h3 class="text-xl font-bold text-gray-800 mb-4">AI Profile</h3>
+        <!-- Container for AI profile form -->
         <div class="mb-6">
+            <!-- Render AI profile form as paragraphs -->
             {{ ai_profile_form.as_p }}
         </div>
+        <!-- Submit button for updating profile -->
         <button type="submit" name="update_profile" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Update Profile</button>
     </form>
 
+    <!-- Header for password change section -->
     <h2 class="text-2xl font-bold text-gray-800 mb-6">Change Password</h2>
     
+    <!-- Form for changing password -->
     <form method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <!-- CSRF token for security -->
         {% csrf_token %}
+        <!-- Render password change form as paragraphs -->
         {{ password_form.as_p }}
+        <!-- Submit button for changing password -->
         <button type="submit" name="change_password" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Change Password</button>
     </form>
 
+    <!-- Check if there are any messages to display -->
     {% if messages %}
+    <!-- Unordered list for displaying messages -->
     <ul class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+        <!-- Loop through each message -->
         {% for message in messages %}
+        <!-- Display message with appropriate CSS classes -->
         <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
         {% endfor %}
     </ul>
     {% endif %}
 </div>
+<!-- End of content block -->
 {% endblock %}

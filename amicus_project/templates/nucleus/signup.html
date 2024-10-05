@@ -1,35 +1,57 @@
+<!-- Extend the base template -->
 {% extends 'nucleus/base.html' %}
 
+<!-- Set the title for the signup page -->
 {% block title %}Sign Up - Amicus Project{% endblock %}
 
+<!-- Begin the content block -->
 {% block content %}
+<!-- Create a container for the signup form -->
 <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
+    <!-- Add padding to the inner content -->
     <div class="p-8">
+        <!-- Display the signup header -->
         <h2 class="text-2xl font-bold text-gray-800 mb-4">Sign Up</h2>
+        <!-- Check if there are any messages to display -->
         {% if messages %}
+        <!-- Create an unordered list for messages -->
         <ul class="mb-4">
+            <!-- Loop through each message -->
             {% for message in messages %}
+            <!-- Display the message with appropriate styling -->
             <li class="{% if message.tags %}{{ message.tags }}{% endif %} text-sm text-red-600">{{ message }}</li>
             {% endfor %}
         </ul>
         {% endif %}
+        <!-- Create the signup form -->
         <form method="post" class="space-y-4">
+            <!-- Add CSRF token for security -->
             {% csrf_token %}
+            <!-- Render the form fields as paragraphs -->
             {{ form.as_p }}
+            <!-- Add the submit button -->
             <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Sign Up</button>
         </form>
+        <!-- Check if there are any form errors -->
         {% if form.errors %}
+        <!-- Create a container for form errors -->
         <div class="form-errors mt-4">
+            <!-- Loop through each field in the form -->
             {% for field in form %}
+                <!-- Loop through each error in the field -->
                 {% for error in field.errors %}
+                    <!-- Display the field label and error message -->
                     <p class="text-sm text-red-600">{{ field.label }}: {{ error }}</p>
                 {% endfor %}
             {% endfor %}
+            <!-- Loop through non-field errors -->
             {% for error in form.non_field_errors %}
+                <!-- Display non-field error messages -->
                 <p class="text-sm text-red-600">{{ error }}</p>
             {% endfor %}
         </div>
         {% endif %}
     </div>
 </div>
+<!-- End the content block -->
 {% endblock %}

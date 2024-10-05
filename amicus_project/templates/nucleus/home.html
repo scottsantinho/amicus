@@ -1,35 +1,54 @@
+<!-- Extend the base template to maintain a consistent layout across all pages -->
 {% extends 'nucleus/base.html' %}
+<!-- Load static files to use in the template, such as images and CSS -->
 {% load static %}
 
+<!-- Define the title block with the text "Home - Amicus Project" -->
 {% block title %}Home - Amicus Project{% endblock %}
 
+<!-- Begin the content block where the main page content will be inserted -->
 {% block content %}
-<div class="home-container flex flex-col items-center justify-center min-h-screen">
-    <div class="logo-container w-1/4 mb-8">
-        <img src="{% static 'assets/logo/logo_V3.png' %}" alt="Amicus Logo" class="w-full h-auto">
-    </div>
-    
-    {% if user.is_authenticated %}
-        <h1 class="amicus-title text-6xl font-bold text-gray-900 mb-4">Amicus</h1>
-        <p class="text-xl text-gray-600 mb-8">Chat with your personalized Amicus</p>
-    {% else %}
-        <h1 class="amicus-title text-6xl font-bold text-gray-900 mb-4">Amicus</h1>
-        <p class="text-xl text-gray-600 mb-8">Welcome to Amicus Project. Please log in or sign up to continue.</p>
-        <div class="flex space-x-4">
-            <a href="{% url 'login' %}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Login</a>
-            <a href="{% url 'signup' %}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Sign Up</a>
+    <!-- Container div with flex layout, column direction, centered items, and minimum height to fill the screen -->
+    <div class="home-container flex flex-col items-center justify-center min-h-screen">
+        <!-- Logo container with width 1/4 and bottom margin -->
+        <div class="logo-container w-1/4 mb-8">
+            <!-- Display the Amicus logo image with full width and automatic height -->
+            <img src="{% static 'assets/logo/logo_V3.png' %}" alt="Amicus Logo" class="w-full h-auto">
         </div>
-    {% endif %}
-</div>
+        
+        <!-- Check if the user is authenticated -->
+        {% if user.is_authenticated %}
+            <!-- Main heading with styled classes -->
+            <h1 class="amicus-title text-6xl font-bold text-gray-900 mb-4">Amicus</h1>
+            <!-- Paragraph prompting user to chat with their personalized Amicus -->
+            <p class="text-xl text-gray-600 mb-8">Chat with your personalized Amicus</p>
+        <!-- If the user is not authenticated -->
+        {% else %}
+            <!-- Main heading with styled classes -->
+            <h1 class="amicus-title text-6xl font-bold text-gray-900 mb-4">Amicus</h1>
+            <!-- Paragraph welcoming user and prompting to log in or sign up -->
+            <p class="text-xl text-gray-600 mb-8">Welcome to Amicus Project. Please log in or sign up to continue.</p>
+            <!-- Container for login and signup buttons with horizontal spacing -->
+            <div class="flex space-x-4">
+                <!-- Link to the login page with styling -->
+                <a href="{% url 'login' %}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Login</a>
+                <!-- Link to the signup page with styling -->
+                <a href="{% url 'signup' %}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Sign Up</a>
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}
 
+<!-- Define the extra_css block to include additional CSS styles -->
 {% block extra_css %}
 <style>
+    /* Define the Cinzel font-face with the source URL */
     @font-face {
         font-family: 'Cinzel';
         src: url('{% static "assets/font/Cinzel-Regular.ttf" %}') format('truetype');
     }
 
+    /* Style for the home container with flex layout and centered alignment */
     .home-container {
         display: flex;
         flex-direction: column;
@@ -38,11 +57,13 @@
         min-height: calc(100vh - 4rem); /* Adjust based on your navbar height */
     }
 
+    /* Style for the logo container with specific width and max-width */
     .logo-container {
         width: 25%; /* Set to 1/4 of the container */
         max-width: 300px; /* Optional: set a max-width to prevent the logo from becoming too large on big screens */
     }
 
+    /* Style for the Amicus title with custom font and color */
     .amicus-title {
         font-family: 'Cinzel', serif;
         color: #1a202c; /* Tailwind's gray-900 */

@@ -1,16 +1,25 @@
+<!-- Start of Selection -->
 {% load markdown_extras %}
 
+<!-- Define a container with flex layout, full height, and gray background -->
 <div class="flex flex-col h-full bg-gray-100">
     <!-- Message List -->
+    <!-- Create a div for the message list with scrolling and padding -->
     <div id="message-list" class="flex-grow overflow-y-auto p-4 space-y-4">
         {% for message in messages %}
+            <!-- Create a flex container that justifies content based on message sender -->
             <div class="flex {% if message.is_user %}justify-end{% else %}justify-start{% endif %} mb-4">
+                <!-- Define a responsive width for message bubbles -->
                 <div class="max-w-xs lg:max-w-md">
+                    <!-- Display the sender's name with conditional styling -->
                     <div class="text-sm font-semibold mb-1 {% if message.is_user %}text-right text-blue-600{% else %}text-left text-gray-600{% endif %}">
                         {% if message.is_user %}{{ user_name }}{% else %}{{ ai_name }}{% endif %}
                     </div>
+                    <!-- Style the message bubble differently for user and AI messages -->
                     <div class="p-3 rounded-lg {% if message.is_user %}bg-blue-500 text-white{% else %}bg-gray-200 text-gray-800{% endif %}">
+                        <!-- Render the message content with Markdown support -->
                         <div class="message-content">{{ message.content|markdown|safe }}</div>
+                        <!-- Display the timestamp with conditional text color -->
                         <div class="text-xs mt-1 {% if message.is_user %}text-blue-200{% else %}text-gray-500{% endif %}">
                             {{ message.timestamp|date:"F d, Y H:i" }}
                         </div>
@@ -21,13 +30,20 @@
     </div>
     
     <!-- Message Form -->
+    <!-- Create a form container with white background and border -->
     <div class="bg-white border-t p-4 rounded-b-lg">
+        <!-- Define the message form with flex layout and spacing -->
         <form id="message-form" class="flex items-center space-x-2" data-conversation-id="{{ conversation.pk }}">
+            <!-- Include CSRF token for security -->
             {% csrf_token %}
+            <!-- Create a textarea for user input with styling and placeholder -->
             <textarea name="content" class="flex-grow p-2 border rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition duration-200" placeholder="Type your message..." rows="1"></textarea>
+            <!-- Create a submit button with styling and hover effect -->
             <button type="submit" class="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition duration-200">
                 <!-- Send Icon -->
+                <!-- Define an SVG icon for the send button -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <!-- Define the path for the send icon -->
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                 </svg>
             </button>
@@ -35,9 +51,11 @@
     </div>
     
     <!-- Hidden elements for user and AI names -->
+    <!-- Store the current user's name in a hidden span for JavaScript access -->
     <span id="current-user-name" style="display: none;">
         {{ request.user.profile.user_name|default:request.user.username }}
     </span>
+    <!-- Store the AI's name in a hidden span for JavaScript access -->
     <span id="ai-name" style="display: none;">
         {{ ai_name }}
     </span>
@@ -45,17 +63,32 @@
 
 <!-- JavaScript for Handling Message Submission -->
 <script>
+    // Get the message list element by its ID
     const messageList = document.getElementById('message-list');
+    // Get the message form element by its ID
     const messageForm = document.getElementById('message-form');
+    // Retrieve the CSRF token value from the hidden input
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    // Get the conversation ID from the template context
     const conversationId = "{{ conversation.pk }}";
 
-    // Store the conversation ID in localStorage
+    // Store the conversation ID in the browser's localStorage for persistence
     localStorage.setItem('selectedConversationId', conversationId);
 
+    /**
+     * Create a new message element with the provided details.
+     * @param {string} name - The name of the message sender.
+     * @param {string} content - The content of the message.
+     * @param {boolean} isUser - Flag indicating if the message is from the user.
+     * @param {string} timestamp - The time the message was sent.
+     * @returns {HTMLElement} - The constructed message div element.
+     */
     function createMessageElement(name, content, isUser, timestamp) {
+        // Create a div element for the message container
         const messageDiv = document.createElement('div');
+        // Assign classes based on whether the message is from the user
         messageDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`;
+        // Set the inner HTML of the message container with dynamic content and styling
         messageDiv.innerHTML = `
             <div class="max-w-xs lg:max-w-md">
                 <div class="text-sm font-semibold mb-1 ${isUser ? 'text-right text-blue-600' : 'text-left text-gray-600'}">
@@ -69,49 +102,78 @@
                 </div>
             </div>
         `;
+        // Return the constructed message element
         return messageDiv;
     }
 
+    /**
+     * Append a new message to the message list and scroll to the bottom.
+     * @param {Object} message - The message data containing name, content, and timestamp.
+     * @param {boolean} isUser - Flag indicating if the message is from the user.
+     */
     function appendMessage(message, isUser) {
+        // Create a new message element using the provided data
         const messageDiv = createMessageElement(message.name, message.content, isUser, message.timestamp);
+        // Append the new message element to the message list
         messageList.appendChild(messageDiv);
+        // Scroll the message list to the bottom to show the latest message
         scrollToBottom();
     }
 
+    /**
+     * Scroll the message list container to the bottom.
+     */
     function scrollToBottom() {
+        // Set the scroll position to the height of the scrollable content
         messageList.scrollTop = messageList.scrollHeight;
     }
 
+    // Add an event listener for the form submission
     messageForm.addEventListener('submit', async (e) => {
+        // Prevent the default form submission behavior
         e.preventDefault();
+        // Create a FormData object from the form
         const formData = new FormData(messageForm);
+        // Get the content of the message from the form data
         const content = formData.get('content');
 
+        // Check if the content is not empty after trimming whitespace
         if (content.trim()) {
             try {
+                // Send a POST request to the server with the message content
                 const response = await fetch(`/conversations/${conversationId}/new_message/`, {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': csrfToken,
                         'Content-Type': 'application/json',
                     },
+                    // Convert the message content to a JSON string
                     body: JSON.stringify({ content: content }),
                 });
 
+                // Check if the response from the server is successful
                 if (response.ok) {
+                    // Parse the JSON data from the response
                     const data = await response.json();
+                    // Append the user's message to the message list
                     appendMessage(data.user_message, true);
+                    // Append the AI's response to the message list
                     appendMessage(data.ai_message, false);
+                    // Reset the form to clear the input field
                     messageForm.reset();
                 } else {
+                    // Log an error message if the response is not successful
                     console.error('Failed to send message:', response.status, response.statusText);
                 }
             } catch (error) {
+                // Log any errors that occur during the fetch request
                 console.error('Error:', error);
             }
         }
     });
 
-    // Scroll to bottom when the page loads
+    // Add an event listener to scroll to the bottom when the page loads
     window.addEventListener('load', scrollToBottom);
 </script>
+# End of Selection
+```

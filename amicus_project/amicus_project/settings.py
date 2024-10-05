@@ -13,23 +13,25 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Define the base directory of the project
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ne%cluk@&gql5@_g-gh_5+#9850r*d)e!*gk)$7$%ih(qktrwp'
+# Define the secret key for the Django project (Note: This should be kept secret in production)
+SECRET_KEY = 'django-insecure-ne%cluk@&gql5@_g-gh_5+#9850r*d)e!*gk)$7$%ih(qktrwp' #THIS KEY DOESN'T MATTER SINCE IT'S AN OPEN SOURCE PROJECT
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# Set debug mode to True (should be set to False in production)
 DEBUG = True
 
+# Define allowed hosts (empty list means only localhost is allowed)
 ALLOWED_HOSTS = []
 
 
 # Application definition
 
+# List of installed applications, including both Django built-ins and custom apps
 INSTALLED_APPS = [
     #Personal Apps
     'widget_tweaks',
@@ -44,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+# List of middleware classes used by the project
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -54,8 +57,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Define the root URL configuration
 ROOT_URLCONF = 'amicus_project.urls'
 
+# Configure the template engine
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -72,10 +77,11 @@ TEMPLATES = [
     },
 ]
 
+# Define the WSGI application
 WSGI_APPLICATION = 'amicus_project.wsgi.application'
 
 
-# Database
+# Database configuration
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
@@ -90,7 +96,7 @@ DATABASES = {
 }
 
 
-# Password validation
+# Password validation settings
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -109,43 +115,55 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
+# Internationalization settings
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
+# Set the language code
 LANGUAGE_CODE = 'en-us'
 
+# Set the time zone
 TIME_ZONE = 'UTC'
 
+# Enable internationalization
 USE_I18N = True
 
+# Enable timezone-aware datetimes
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
+# Static files (CSS, JavaScript, Images) configuration
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
+# Define the URL prefix for static files
 STATIC_URL = '/static/'
+# Define additional directories where Django should look for static files
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+# Define the directory where Django will collect all static files
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Default primary key field type
+# Set the default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Set the custom user model
 AUTH_USER_MODEL = 'nucleus.CustomUser'
 
-# Add these lines after defining STATICFILES_DIRS
+# Print debug information about static file directories
 print(f"BASE_DIR: {BASE_DIR}")
 print(f"STATICFILES_DIRS: {STATICFILES_DIRS}")
 
+# Define authentication backends
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
+# Set the URL to redirect to after successful login
 LOGIN_REDIRECT_URL = 'home'
+# Set the URL to redirect to after logout
 LOGOUT_REDIRECT_URL = 'home'
 
-REPLICATE_API_TOKEN = 'r8_MwQGs74BmerRzTDHICLGlqj2Aul9S9E2Y0kVg'
+# Set the Replicate API token (Note: This should be stored as an environment variable in production)
+REPLICATE_API_TOKEN = 'r8_MwQGs74BmerRzTDHICLGlqj2Aul9S9E2Y0kVg' #MAKE SURE TO CREATE A ENVIRONMENT VARIABLE FOR THIS LATER
