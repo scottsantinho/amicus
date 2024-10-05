@@ -1,6 +1,6 @@
 # Amicus Project
 
-![Amicus Logo](static/assets/logo/logo_V3.png)
+https://github.com/user-attachments/assets/33b0c7f3-140f-406b-9f87-086374c4a966
 
 ## Table of Contents
 - [Description](#description)
