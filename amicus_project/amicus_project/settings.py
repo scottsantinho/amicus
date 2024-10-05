@@ -166,4 +166,4 @@ LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
 # Set the Replicate API token (Note: This should be stored as an environment variable in production)
-REPLICATE_API_TOKEN = 'r8_MwQGs74BmerRzTDHICLGlqj2Aul9S9E2Y0kVg'
+REPLICATE_API_TOKEN = 'enter replicate api token here'
