@@ -18,7 +18,7 @@ To run the project locally, follow these steps:
 
 1. **Clone the repository:**
     ```bash
-    git clone https://github.com/yourusername/amicus_project.git
+    git clone https://github.com/scottsantinho/amicus.git
     cd amicus_project
     ```
 

@@ -1,0 +1,34 @@
+# Web Framework
+Django==5.0.1  # Assuming the latest version, adjust if needed
+
+# Database
+psycopg2-binary==2.9.9
+
+# API and Networking
+requests==2.32.3
+aiohttp==3.9.1  # Version may need adjustment
+
+# Machine Learning and AI
+transformers==4.44.2
+torch==2.1.2  # Version may need adjustment
+numpy==1.26.3  # Version may need adjustment
+
+# Hugging Face Hub
+huggingface-hub==0.20.3  # Version may need adjustment
+
+# Markdown Processing
+Markdown==3.7
+
+# Testing
+pytest==8.3.3
+
+# Development Tools
+pip==24.2
+setuptools==70.3.0
+
+# Packaging
+packaging==24.1
+wheel==0.42.0  # Version may need adjustment
+
+# Additional Dependencies
+replicate==0.32.1
